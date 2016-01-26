@@ -4,17 +4,23 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
     tbdText: 'TBD',
 
     getHealthColor: function(field, values){
-        var color = values[field] || '#FFFFFF';
+        var re = /color=\"(.*)\"/i,
+            color = values[field] || '#FFFFFF',
+            match = color.match(re);
+
+        if (match && match.length > 1){
+            color = match[1];
+        }
         return color;
     },
 
     getProjectTitle: function(values){
-        var parent = "(No Parent)";
+        var parent = this.noParentString;
 
         if (values.Parent){
             parent = values.Parent.Name || parent;
         }
-        return parent + ' - ' + values.Name;
+        return this.getStringValue(parent + ' - ' + values.Name);
     },
     getFormattedDate: function(field, values){
         if (field && values[field]){
@@ -25,8 +31,8 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
         }
         return null;
     },
-    config: {
-
+    getStringValue: function(text){
+        return Ext.String.ellipsis(text, this.maxChars, true);
     },
 
     constructor: function(config) {
@@ -43,30 +49,30 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
                 '<tr>',
                     '<td class="prb" rowspan="2">{[this.getProjectTitle(values)]}</td>',
                     '<td class="prb">',
-                        '<tpl if="values[this.sponsorField]">{[values[this.sponsorField]]} (S)</br></tpl>',
-                        '<tpl if="values[this.ecField]">{[values[this.ecField]]} (EC)</br></tpl>',
-                        '<tpl if="values[this.pmField]">{[values[this.pmField]]} (PM)</br></tpl>',
-                        '<tpl if="values[this.blField]">{[values[this.blField]]} (BL)</br></tpl>',
+                        '<tpl if="values[this.sponsorField]">{[this.getStringValue(values[this.sponsorField])]} (S)</br></tpl>',
+                        '<tpl if="values[this.ecField]">{[this.getStringValue(values[this.ecField])]} (EC)</br></tpl>',
+                        '<tpl if="values[this.pmField]">{[this.getStringValue(values[this.pmField])]} (PM)</br></tpl>',
+                        '<tpl if="values[this.blField]">{[this.getStringValue(values[this.blField])]} (BL)</br></tpl>',
                     '</td>',
                     '<td class="prb">',
                         '<tpl if="values[this.startDateField]">{[this.getFormattedDate(this.startDateField, values)]}<tpl else>{[this.tbdText]}</tpl> (S)</br>',
                         '<tpl if="values[this.releaseDateField]">{[this.getFormattedDate(this.releaseDateField, values)]}<tpl else>{[this.tbdText]}</tpl> (R)</br>',
                         '<tpl if="values[this.endDateField]">{[this.getFormattedDate(this.endDateField, values)]}<tpl else>{[this.tbdText]}</tpl> (E)</br>',
                     '</td>',
-                    '<td class="prb">{[values[this.nextKeyMilestoneField]]}</td>',
+                    '<td class="prb">{[this.getStringValue(values[this.nextKeyMilestoneField])]}</td>',
                     '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthField, values)]};">H</td>',
-                    '<td class="prb" colspan="5">{[values[this.budgetField]]}</td>',
+                    '<td class="prb" colspan="5">{[this.getStringValue(values[this.budgetSpentField])]}</td>',
                 '</tr>',
                '<tr>',
                    '<td class="prb">',
-                       '<tpl if="values[this.vsmField]">{[values[this.vsmField]]} (VSM),</tpl>',
-                       '<tpl if="values[this.sltField]">{[values[this.sltField]]} (SLT)</tpl>',
+                       '<tpl if="values[this.vsmField]">{[this.getStringValue(values[this.vsmField])]} (VSM),</tpl>',
+                       '<tpl if="values[this.sltField]">{[this.getStringValue(values[this.sltField])]} (SLT)</tpl>',
                    '</td>',
                    '<td class="prb">',
                        '<tpl if="values[this.linkField]"><a href="{[values[this.linkField]]}">Status Report</a></tpl>',
                    '</td>',
                    '<td class="prb">',
-                        '<tpl if="values[this.budgetField]">Budget Spend:  {[values[this.budgetField]]}</tpl>',
+                        '<tpl if="values[this.budgetField]">Total Budget:  {[this.getStringValue(values[this.totalBudgetField])]}</tpl>',
                     '</td>',
                    '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthTimelineField, values)]};">T</td>',
                    '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthScopeField, values)]};">S</td>',
@@ -79,7 +85,6 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
            '</tpl>'
        ];
 
-        templateConfig.push(this.config);
         templateConfig.push(config);
 
         return this.callParent(templateConfig);

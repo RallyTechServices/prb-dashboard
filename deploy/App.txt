@@ -3,11 +3,11 @@
 <head>
     <title>PRB Dashboard</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Sun Jan 17 2016 12:57:51 GMT-0700 (MST) -->
+    <!--  Build Date: Tue Jan 26 2016 14:00:26 GMT-0700 (MST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Sun Jan 17 2016 12:57:51 GMT-0700 (MST)";
-        var CHECKSUM = 3718167018;
+        var APP_BUILD_DATE = "Tue Jan 26 2016 14:00:26 GMT-0700 (MST)";
+        var CHECKSUM = 8825339603;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -182,97 +182,219 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
     tbdText: 'TBD',
 
     getHealthColor: function(field, values){
-        var color = values[field] || '#FFFFFF';
+        var re = /color=\"(.*)\"/i,
+            color = values[field] || '#FFFFFF',
+            match = color.match(re);
+
+        if (match && match.length > 1){
+            color = match[1];
+        }
         return color;
     },
 
-    config: {
+    getProjectTitle: function(values){
+        var parent = this.noParentString;
 
+        if (values.Parent){
+            parent = values.Parent.Name || parent;
+        }
+        return this.getStringValue(parent + ' - ' + values.Name);
+    },
+    getFormattedDate: function(field, values){
+        if (field && values[field]){
+            var dt = Rally.util.DateTime.fromIsoString(values[field]);
+            if (dt){
+                return Rally.util.DateTime.format(dt, 'M Y');
+            }
+        }
+        return null;
+    },
+    getStringValue: function(text){
+        return Ext.String.ellipsis(text, this.maxChars, true);
     },
 
     constructor: function(config) {
        var templateConfig = [
-           '<tpl>',
-           '<table>',
+           '<tpl foreach=".">',
+           '<table class="prb">',
                 '<tr>',
-                    '<th width="25%">BU/CRG - Project Title</th>',
-                    '<th width="25%">Sponsors (S), (EC)</br>Project Manager (PM), BU Lead (BL)</th>',
-                    '<th width="15%">Start Date (S)</br>Release (R)</br>End Date (E)</th>',
-                    '<th width="20%">Next Key Milestone</th>',
-                    '<th colspan="6">Project Health:</br><span style="text-decoration:underline;">T</span>imeline, <em>S</em>cope, <em>Q</em>uality, <em>R</em>esources, <em>B</em>udget Spend, <em>C</em>hange (BU/CRG)</th>',
+                    '<th class="prb" width="25%">BU/CRG - Project Title</th>',
+                    '<th class="prb" width="25%">Sponsors (S), (EC)</br>Project Manager (PM), BU Lead (BL)</th>',
+                    '<th class="prb" width="15%">Start Date (S)</br>Release (R)</br>End Date (E)</th>',
+                    '<th class="prb" width="20%">Next Key Milestone</th>',
+                    '<th class="prb" colspan="6">Project Health:</br><span style="text-decoration:underline;">T</span>imeline, <em>S</em>cope, <em>Q</em>uality, <em>R</em>esources, <em>B</em>udget Spend, <em>C</em>hange (BU/CRG)</th>',
                 '</tr>',
                 '<tr>',
-                    '<td rowspan="2">{[values[this.buField]]} - {[values[this.projectField]]}</td>',
-                    '<td>',
-                        '<tpl if="values[this.sponsorField]">{[values[this.sponsorField]]} (S)</br></tpl>',
-                        '<tpl if="values[this.ecField]">{[values[this.ecField]]} (EC)</br></tpl>',
-                        '<tpl if="values[this.pmField]">{[values[this.pmField]]} (PM)</br></tpl>',
-                        '<tpl if="values[this.blField]">{[values[this.blField]]} (BL)</br></tpl>',
+                    '<td class="prb" rowspan="2">{[this.getProjectTitle(values)]}</td>',
+                    '<td class="prb">',
+                        '<tpl if="values[this.sponsorField]">{[this.getStringValue(values[this.sponsorField])]} (S)</br></tpl>',
+                        '<tpl if="values[this.ecField]">{[this.getStringValue(values[this.ecField])]} (EC)</br></tpl>',
+                        '<tpl if="values[this.pmField]">{[this.getStringValue(values[this.pmField])]} (PM)</br></tpl>',
+                        '<tpl if="values[this.blField]">{[this.getStringValue(values[this.blField])]} (BL)</br></tpl>',
                     '</td>',
-                    '<td>',
-                        '<tpl if="values[this.startDateField]">{[values[this.startDateField]]} (S)<tpl else>{[this.tbdText]}</tpl></br>',
-                        '<tpl if="values[this.releaseDateField]">{[values[this.releaseDateField]]} (R)<tpl else>{[this.tbdText]}</tpl></br>',
-                        '<tpl if="values[this.endDateField]">{[values[this.endDateField]]} (E)<tpl else>{[this.tbdText]}</tpl></br>',
+                    '<td class="prb">',
+                        '<tpl if="values[this.startDateField]">{[this.getFormattedDate(this.startDateField, values)]}<tpl else>{[this.tbdText]}</tpl> (S)</br>',
+                        '<tpl if="values[this.releaseDateField]">{[this.getFormattedDate(this.releaseDateField, values)]}<tpl else>{[this.tbdText]}</tpl> (R)</br>',
+                        '<tpl if="values[this.endDateField]">{[this.getFormattedDate(this.endDateField, values)]}<tpl else>{[this.tbdText]}</tpl> (E)</br>',
                     '</td>',
-                    '<td>{[values[this.nextKeyMilestoneField]]}</td>',
-                    '<td style="background-color:{[this.getHealthColor(this.projectHealthField, values)]};">H</td>',
-                    '<td colspan="5">{[values[this.budgetField]]}</td>',
+                    '<td class="prb">{[this.getStringValue(values[this.nextKeyMilestoneField])]}</td>',
+                    '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthField, values)]};">H</td>',
+                    '<td class="prb" colspan="5">{[this.getStringValue(values[this.budgetSpentField])]}</td>',
                 '</tr>',
                '<tr>',
-                   '<td>',
-                       '<tpl if="values[this.vsmField]">{[values[this.vsmField]]} (VSM),</tpl>',
-                       '<tpl if="values[this.sltField]">{[values[this.sltField]]} (SLT)</tpl>',
+                   '<td class="prb">',
+                       '<tpl if="values[this.vsmField]">{[this.getStringValue(values[this.vsmField])]} (VSM),</tpl>',
+                       '<tpl if="values[this.sltField]">{[this.getStringValue(values[this.sltField])]} (SLT)</tpl>',
                    '</td>',
-                   '<td>',
+                   '<td class="prb">',
                        '<tpl if="values[this.linkField]"><a href="{[values[this.linkField]]}">Status Report</a></tpl>',
                    '</td>',
-                   '<td>',
-                        '<tpl if="values[this.budgetField]">Budget Spend:  {[values[this.budgetField]]}</tpl>',
+                   '<td class="prb">',
+                        '<tpl if="values[this.budgetField]">Total Budget:  {[this.getStringValue(values[this.totalBudgetField])]}</tpl>',
                     '</td>',
-                   '<td style="background-color:{[this.getHealthColor(this.projectHealthTimelineField, values)]};">T</td>',
-                   '<td style="background-color:{[this.getHealthColor(this.projectHealthScopeField, values)]};">S</td>',
-                   '<td style="background-color:{[this.getHealthColor(this.projectHealthQualityField, values)]};">Q</td>',
-                   '<td style="background-color:{[this.getHealthColor(this.projectHealthResourcesField, values)]};">R</td>',
-                   '<td style="background-color:{[this.getHealthColor(this.projectHealthBudgetSpendField, values)]};">B</td>',
-                   '<td style="background-color:{[this.getHealthColor(this.projectHealthChangeField, values)]};">C</td>',
+                   '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthTimelineField, values)]};">T</td>',
+                   '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthScopeField, values)]};">S</td>',
+                   '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthQualityField, values)]};">Q</td>',
+                   '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthResourcesField, values)]};">R</td>',
+                   '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthBudgetSpendField, values)]};">B</td>',
+                   '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthChangeField, values)]};">C</td>',
            '</tr>',
            '</table>',
            '</tpl>'
        ];
 
-        templateConfig.push(this.config);
         templateConfig.push(config);
 
         return this.callParent(templateConfig);
     }
 });
 
+Ext.define('Rally.technicalservices.combobox.AllowedFieldTypesCombobox', {
+        requires: [],
+        extend: 'Rally.ui.combobox.FieldComboBox',
+        alias: 'widget.tsallowedfieldtypecombobox',
+
+    _isNotHidden: function(field) {
+        var allowedTypes = this.allowedTypes || [];
+        if (!field.hidden && field.attributeDefinition && Ext.Array.contains(allowedTypes, field.attributeDefinition.AttributeType)){
+            return true;
+        }
+        return false;
+    },
+    _populateStore: function() {
+        if (!this.store) {
+            return;
+        }
+
+        var data = _.sortBy(
+            _.map(
+                _.filter(this.model.getFields(), this._isNotHidden, this),
+                this._convertFieldToLabelValuePair,
+                this
+            ),
+            'name'
+        );
+
+        this.store.loadRawData(data);
+        this.setDefaultValue();
+        this.onReady();
+    }
+});
 Ext.define('Rally.technicalservices.prbDashboard.Settings',{
 
-    getFieldMappings: function(){
-        return {
-            buField: 'BU',
-            projectField: 'Project',
-            sponsorField: 'S',
-            ecField: 'EC',
-            pmField: 'PM',
-            blField: 'BL',
-            sltField: 'SLT',
-            vsmField: 'VSM',
-            startDateField: 'StartDate',
-            endDateField: 'EndDate',
-            releaseDateField: 'Release',
-            nextKeyMilestoneField: 'NextKeyMilestone',
-            projectHealthField: 'ProjectHealth',
-            projectHealthTimelineField: 'ProjectHealthTimeline',
-            projectHealthScopeField: 'ProjectHealthScope',
-            projectHealthQualityField: 'ProjectHealthQuality',
-            projectHealthResourcesField: 'ProjectHealthResources',
-            projectHealthBudgetSpendField: 'ProjectHealthBudgetSpend',
-            projectHealthChangeField: 'ProjectHealthChange',
-            budgetField: 'Budget',
-            linkField: 'LinkField'
-        };
+
+
+    getFieldMappings: function(settings){
+        //todo - as we add more app settings that aren't fields, we will need to filter these out
+        return settings;
+    },
+    statics: {
+        fieldLabels: {
+            sponsorField: 'Business Sponsor Field',
+            ecField: 'EC Field',
+            pmField: 'PM Field',
+            blField: 'BU Lead Field',
+            sltField: 'SLT Field',
+            vsmField: 'VSM Field',
+            startDateField: 'Start Date Field',
+            endDateField: 'End Date Field',
+            releaseDateField: 'Release Date Field',
+            nextKeyMilestoneField: 'NextKeyMilestone Field',
+            projectHealthField: 'Project Health Field',
+            projectHealthTimelineField: 'Project Health Timeline Field',
+            projectHealthScopeField: 'Project Health Scope Field',
+            projectHealthQualityField: 'Project Health Quality Field',
+            projectHealthResourcesField: 'Project Health Resources Field',
+            projectHealthBudgetSpendField: 'Project Health Budget Spend Field',
+            projectHealthChangeField: 'Project Health Change Field',
+            totalBudgetField: 'Total Budget Field',
+            budgetSpentField: 'Budget Spent Field',
+            linkField: 'Status Report Link Field'
+        },
+
+        getFields: function (model) {
+            var labelWidth = 250,
+                fields = [];
+
+
+            fields.push({
+                xtype: 'textarea',
+                fieldLabel: 'Query',
+                name: 'reportQuery',
+                anchor: '100%',
+                cls: 'query-field',
+                margin: '0 70 25 0',
+                plugins: [
+                    {
+                        ptype: 'rallyhelpfield',
+                        helpId: 194
+                    },
+                    'rallyfieldvalidationui'
+                ],
+                validateOnBlur: false,
+                validateOnChange: false,
+                validator: function(value) {
+                    try {
+                        if (value) {
+                            Rally.data.wsapi.Filter.fromQueryString(value);
+                        }
+                        return true;
+                    } catch (e) {
+                        return e.message;
+                    }
+                }
+            });
+
+            fields.push({
+                xtype: 'rallynumberfield',
+                name: 'maxChars',
+                minValue: 0,
+                fieldLabel: "Max Characters",
+                labelAlign: 'right',
+                labelWidth: labelWidth,
+            });
+
+            _.each(this.fieldLabels, function (label, name) {
+
+                var allowedTypes = ['STRING','TEXT'];
+                if (/DateField/.test(name)){
+                    allowedTypes = ['DATE'];
+                }
+                fields.push({
+                    xtype: 'tsallowedfieldtypecombobox',
+                    allowedTypes: allowedTypes,
+                    model: model,
+                    name: name,
+                    fieldLabel: label,
+                    labelAlign: 'right',
+                    labelWidth: labelWidth,
+                    width: 500
+                });
+            });
+
+
+            return fields;
+        }
     }
 });
 
@@ -281,54 +403,148 @@ Ext.define("prb-dashboard", {
     componentCls: 'app',
     logger: new Rally.technicalservices.Logger(),
     defaults: { margin: 10 },
-    items: [
-        {xtype:'container',itemId:'message_box',tpl:'Hello, <tpl>{_refObjectName}</tpl>'},
-        {xtype:'container',itemId:'display_box'}
-    ],
+
+    config: {
+        defaultSettings: {
+
+                reportQuery: null,
+                model: 'PortfolioItem/ProgramorProject',
+                maxChars: 100,
+                noParentString: '(No Parent)',
+
+                sponsorField: 'Name',
+                ecField: 'Name',
+                pmField: 'Name',
+                blField: 'Name',
+                sltField: 'Name',
+                vsmField: 'Name',
+                startDateField: 'PlannedStartDate',
+                endDateField: 'PlannedEndDate',
+                releaseDateField: 'ActualEndDate',
+                nextKeyMilestoneField: 'Name',
+                projectHealthField: 'DisplayColor',
+                projectHealthTimelineField: 'DisplayColor',
+                projectHealthScopeField: 'DisplayColor',
+                projectHealthQualityField: 'DisplayColor',
+                projectHealthResourcesField: 'DisplayColor',
+                projectHealthBudgetSpendField: 'DisplayColor',
+                projectHealthChangeField: 'DisplayColor',
+                totalBudgetField: 'Name',
+                budgetSpentField: 'Name',
+                linkField: 'Name'
+        }
+    },
 
     integrationHeaders : {
         name : "prb-dashboard"
     },
                         
     launch: function() {
-        var appSettings = Ext.create('Rally.technicalservices.prbDashboard.Settings');
+        this.fetchData();
+    },
+    fetchData: function(){
 
-        var tpl = new Rally.technicalservices.prbDashboard.Template(appSettings.getFieldMappings());
+        var model = this.getSetting('model'),
+            fetchFields = ['Parent','Name','ObjectID'].concat(_.values(this.getSettings())),
+            storeConfig = {
+                model: model,
+                fetch: fetchFields,
+                limit: 'Infinity'
+            },
+            query = this.getSetting('reportQuery') || null;
+        this.logger.log('Query', query);
+        if (query){
+            storeConfig.filters = Rally.data.wsapi.Filter.fromQueryString(query);
+        }
 
-        var data = {
-            BU: 'PwM',
-            Project: 'Baird Online Transformation Program (BOL)',
-            S: 'Pete Duback, Ryan Burwell',
-            EC: 'Mike Schroeder',
-            PM: 'John Ellison',
-            BL: 'Joe Ghali',
-            VSM: 'Beth Howell',
-            SLT: 'Jonathan Cohn',
-            StartDate: 'Dec 2013',
-            Release: '10/7/15',
-            EndDate: 'Q2 2016',
-            NextKeyMilestone: '9/30: Money Movement Project Kick-off',
-            ProjectHealth: 'ph',
-            ProjectHealthTimeline: '#0FF000',
-            ProjectHealthScope: 'pht',
-            ProjectHealthQuality: 'phq',
-            ProjectHealthResources: '#FF0000',
-            ProjectHealthBudgetSpend: '#0000FF',
-            ProjectHealthChange: '#00FF00',
-            LinkField: 'https://www.google.com/',
-            Budget: '$1.7M'
-        };
+        Ext.create('Rally.data.wsapi.Store',storeConfig).load({
+            scope: this,
+            callback: this.runReport
+        });
 
+    },
+    _addParentFilter: function(items){
+
+        var noParentString = this.getSetting('noParentString'),
+            parents = _.uniq(_.map(items, function(item){ return item.Parent && item.Parent.Name || noParentString;}));
+        parents = _.map(parents, function(p){
+            var val = p;
+            if (p === noParentString){
+                val = null;
+            }
+            return {name: p, value: p};
+        });
+        this.logger.log('_addParentFilter', parents);
+
+
+        var cb = this.add({
+            xtype: 'rallycombobox',
+            fieldLabel: 'BU/CRG',
+            labelAlign: 'right',
+            store: Ext.create('Rally.data.custom.Store',{
+                fields: ['name','value'],
+                data: parents
+            }),
+            displayField: 'name',
+            valueField: 'value',
+            allowNoEntry: true,
+            noEntryText: '-- No BU/CRG --',
+            multiSelect: true,
+            width: 500
+        });
+        cb.on('change', this._updateReport, this);
+    },
+    runReport: function(portfolioItems, operation){
+        this.logger.log('_runReport', portfolioItems, operation);
+        this.removeAll();
+
+
+        var items = _.sortBy(_.map(portfolioItems, function(pi) {
+            return pi.getData();
+        }), function(pi){ return pi.Parent && pi.Parent.Name || "ZZZ";});
+
+        this.portfolioItems = items;
+
+        this._addParentFilter(items);
+
+       this._updateReport();
+
+    },
+    _updateReport: function(cb){
+
+        var filters = cb && cb.getValue() || [];
+
+        var filteredItems = this.portfolioItems;
+        if (filters.length > 0){
+            filteredItems = _.filter(filteredItems, function(item){
+                var parent = item.Parent && item.Parent.Name || null;
+                return Ext.Array.contains(filters, parent);
+            });
+        }
+        this.logger.log('filteredItems', filters, filteredItems)
+
+        if (this.down('#tpl-report')){
+            this.down('#tpl-report').destroy();
+        }
+
+        var appSettings = Ext.create('Rally.technicalservices.prbDashboard.Settings', this.getSettings()),
+            tplConfig = appSettings.getFieldMappings(this.getSettings()),
+            noParentString = "(No Parent)";
+
+        tplConfig.maxChars = this.getSetting('maxChars');
+        tplConfig.noParentString = noParentString;
+
+        var tpl = new Rally.technicalservices.prbDashboard.Template(tplConfig);
 
         this.add({
             xtype: 'container',
+            itemId: 'tpl-report',
             tpl: tpl,
             margin: '0 100 0 100',
             flex: 1
-        }).update(data);
+        }).update(filteredItems);
 
     },
-    
     getOptions: function() {
         return [
             {
@@ -338,7 +554,9 @@ Ext.define("prb-dashboard", {
             }
         ];
     },
-    
+    getSettingsFields: function(){
+        return Rally.technicalservices.prbDashboard.Settings.getFields(this.getSetting('model'));
+    },
     _launchInfo: function() {
         if ( this.about_dialog ) { this.about_dialog.destroy(); }
         this.about_dialog = Ext.create('Rally.technicalservices.InfoLink',{});
@@ -351,8 +569,7 @@ Ext.define("prb-dashboard", {
     //onSettingsUpdate:  Override
     onSettingsUpdate: function (settings){
         this.logger.log('onSettingsUpdate',settings);
-        // Ext.apply(this, settings);
-        this.launch();
+        this.fetchData();
     }
 });
 
@@ -383,23 +600,24 @@ Ext.define("prb-dashboard", {
     cursor: pointer;
 }
 
-table {
+table.prb{
     border-collapse: collapse;
     width: 100%;
+    margin: 25px;
 }
 
-th {
+th.prb {
     background-color: #c0c0c0;
     padding: 5px;
     font-family: ProximaNovaSemiBold, Helvetica, Arial;
 }
 
-td {
+td.prb {
     padding: 10px;
     font-family: ProximaNova, Helvetica, Arial;
 }
 
-table, th, td {
+.prb {
     border: 1px solid black;
 }
     </style>
