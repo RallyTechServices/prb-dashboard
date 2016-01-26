@@ -3,10 +3,10 @@
 <head>
     <title>PRB Dashboard</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Tue Jan 26 2016 13:59:50 GMT-0700 (MST) -->
+    <!--  Build Date: Tue Jan 26 2016 14:00:26 GMT-0700 (MST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Tue Jan 26 2016 13:59:50 GMT-0700 (MST)";
+        var APP_BUILD_DATE = "Tue Jan 26 2016 14:00:26 GMT-0700 (MST)";
         var CHECKSUM = [%= checksum %];
     </script>
     
