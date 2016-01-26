@@ -25,7 +25,8 @@ Ext.define('Rally.technicalservices.prbDashboard.Settings',{
             projectHealthResourcesField: 'Project Health Resources Field',
             projectHealthBudgetSpendField: 'Project Health Budget Spend Field',
             projectHealthChangeField: 'Project Health Change Field',
-            budgetField: 'Budget Field',
+            totalBudgetField: 'Total Budget Field',
+            budgetSpentField: 'Budget Spent Field',
             linkField: 'Status Report Link Field'
         },
 
@@ -33,9 +34,53 @@ Ext.define('Rally.technicalservices.prbDashboard.Settings',{
             var labelWidth = 250,
                 fields = [];
 
+
+            fields.push({
+                xtype: 'textarea',
+                fieldLabel: 'Query',
+                name: 'reportQuery',
+                anchor: '100%',
+                cls: 'query-field',
+                margin: '0 70 25 0',
+                plugins: [
+                    {
+                        ptype: 'rallyhelpfield',
+                        helpId: 194
+                    },
+                    'rallyfieldvalidationui'
+                ],
+                validateOnBlur: false,
+                validateOnChange: false,
+                validator: function(value) {
+                    try {
+                        if (value) {
+                            Rally.data.wsapi.Filter.fromQueryString(value);
+                        }
+                        return true;
+                    } catch (e) {
+                        return e.message;
+                    }
+                }
+            });
+
+            fields.push({
+                xtype: 'rallynumberfield',
+                name: 'maxChars',
+                minValue: 0,
+                fieldLabel: "Max Characters",
+                labelAlign: 'right',
+                labelWidth: labelWidth,
+            });
+
             _.each(this.fieldLabels, function (label, name) {
+
+                var allowedTypes = ['STRING','TEXT'];
+                if (/DateField/.test(name)){
+                    allowedTypes = ['DATE'];
+                }
                 fields.push({
-                    xtype: 'rallyfieldcombobox',
+                    xtype: 'tsallowedfieldtypecombobox',
+                    allowedTypes: allowedTypes,
                     model: model,
                     name: name,
                     fieldLabel: label,
@@ -44,6 +89,7 @@ Ext.define('Rally.technicalservices.prbDashboard.Settings',{
                     width: 500
                 });
             });
+
 
             return fields;
         }
