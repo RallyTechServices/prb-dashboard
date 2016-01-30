@@ -3,10 +3,10 @@
 <head>
     <title>PRB Dashboard</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Tue Jan 26 2016 14:00:26 GMT-0700 (MST) -->
+    <!--  Build Date: Fri Jan 29 2016 20:37:23 GMT-0700 (MST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Tue Jan 26 2016 14:00:26 GMT-0700 (MST)";
+        var APP_BUILD_DATE = "Fri Jan 29 2016 20:37:23 GMT-0700 (MST)";
         var CHECKSUM = [%= checksum %];
     </script>
     
@@ -62,6 +62,184 @@ td.prb {
 .prb {
     border: 1px solid black;
 }
+/*<style type="text/css" title="printCards">*/
+/*!* PLEASE LEAVE THIS STYLESHEET INLINE SINCE TITLE IS NECESSARY *!*/
+/*@media print {*/
+    /*#interface {*/
+        /*display: none;*/
+    /*}*/
+
+    /*.pb {*/
+        /*page-break-after: always;*/
+        /*clear: both;*/
+    /*}*/
+/*}*/
+
+/*#interface, #printSection {*/
+    /*margin: 20px;*/
+/*}*/
+
+/*html {*/
+    /*background-color: #fff;*/
+    /*color: #000;*/
+    /*font: 14pt / 1.26 Arial, Helvetica, sans-serif;*/
+    /*margin: 0;*/
+    /*padding: 0;*/
+/*}*/
+
+/*body {*/
+    /*background-color: #fff;*/
+    /*margin: 0;*/
+    /*padding: 0;*/
+/*}*/
+
+/*.cb {*/
+    /*clear: both;*/
+/*}*/
+
+/*.artifact {*/
+    /*background-color: #fff;*/
+    /*border: 2px solid #000;*/
+    /*float: left;*/
+    /*height: 3.7in;*/
+    /*margin: 0.1in 0.1in 0.1in 0.1in;*/
+    /*position: relative;*/
+    /*overflow: hidden;*/
+    /*width: 4.9in;*/
+/*}*/
+/*.r1 {*/
+    /*border: 1px;*/
+    /*border-bottom-style: solid;*/
+    /*height: 60px;*/
+    /*font-family: NotoSans, Helvetica, Arial;*/
+    /*font-size: 11pt;*/
+    /*color: #000000;*/
+/*}*/
+/*.r1left {*/
+    /*display: table-cell;*/
+    /*padding-top: 0.5em;*/
+    /*width: 3.6in;*/
+    /*padding-left: 0.5em;*/
+    /*overflow: hidden;*/
+    /*border-right: 1px solid #000;*/
+    /*height: 60px;*/
+/*}*/
+/*.r1right {*/
+    /*display: table-cell;*/
+    /*padding-top: 0.5em;*/
+    /*padding-left: 0.5em;*/
+/*}*/
+/*.r2{*/
+    /*border: 1px;*/
+    /*border-bottom-style: solid;*/
+    /*height: 40px;*/
+    /*font-family: NotoSans, Helvetica, Arial;*/
+    /*font-size: 10pt;*/
+/*}*/
+/*.r2left {*/
+    /*display: table-cell;*/
+    /*width: 1.7in;*/
+    /*padding-top: 0.5em;*/
+    /*padding-left: 0.5em;*/
+    /*border-right: 1px solid #000;*/
+    /*height: 40px;*/
+/*}*/
+/*.r2middle {*/
+    /*display: table-cell;*/
+    /*width: 1.5in;*/
+    /*padding-top: 0.5em;*/
+    /*padding-left: 0.5em;*/
+    /*border-right: 1px solid #000;*/
+/*}*/
+/*.r2right {*/
+    /*display: table-cell;*/
+    /*padding-top: 0.5em;*/
+    /*padding-left: 0.5em;*/
+/*}*/
+/*.r3{*/
+    /*border: 1px;*/
+    /*border-bottom-style: solid;*/
+    /*height: 140px;*/
+    /*font-family: NotoSans, Helvetica, Arial;*/
+    /*font-size: 12pt;*/
+    /*padding-left: 0.5em;*/
+    /*padding-right: 0.5em;*/
+/*}*/
+/*.r3middle {*/
+    /*display: block;*/
+    /*vertical-align: middle;*/
+    /*text-align: left;*/
+/*}*/
+/*.r4{*/
+    /*border: 1px;*/
+    /*border-bottom-style: solid;*/
+    /*height: 120px;*/
+    /*font-family: NotoSans, Helvetica, Arial;*/
+    /*font-size: 12pt;*/
+    /*padding-left: 0.5em;*/
+/*}*/
+/*.r4middle {*/
+    /*display: table-cell;*/
+    /*vertical-align: middle;*/
+    /*text-align: left;*/
+/*}*/
+/*.header {*/
+    /*border: 1px;*/
+    /*border-bottom-style: solid;*/
+    /*display: table-cell;*/
+    /*height: 40px;*/
+    /*vertical-align: middle;*/
+    /*width: 4.3in;*/
+/*}*/
+
+/*.card-title {*/
+    /*font: bold 28px Genova, sans-serif;*/
+    /*padding-top: 0.5em;*/
+    /*text-align: center;*/
+/*}*/
+
+/*.description {*/
+    /*float: left;*/
+    /*font: 12pt Georgia, sans-serif;*/
+    /*margin: 0.25em auto 0 auto;*/
+    /*padding-left: 1.0em;*/
+    /*padding-right: 1.0em;*/
+    /*overflow-y: hidden;*/
+    /*width: 100%;*/
+    /*word-wrap: break-word;*/
+/*}*/
+
+/*.owner {*/
+    /*float: right;*/
+    /*height: 40px;*/
+/*}*/
+
+/*.ownerText {*/
+    /*float: right;*/
+    /*font: 14pt / 1.26 Arial, Helvetica, sans-serif;*/
+    /*margin-right: 0.3em;*/
+    /*margin-top: 0.3em;*/
+/*}*/
+
+/*.card-id {*/
+    /*float: left;*/
+    /*font: 14pt / 1.26 Arial, Helvetica, sans-serif;*/
+    /*margin-left: 0.25em;*/
+    /*margin-top: 0.3em;*/
+/*}*/
+
+/*.estimate {*/
+    /*bottom: 0.5em;*/
+    /*position: absolute;*/
+    /*right: 0.5em;*/
+/*}*/
+
+/*.content {*/
+    /*height: 2.4in;*/
+    /*overflow: hidden;*/
+    /*width: 3.7in;*/
+/*}*/
+/*</style>*/
     </style>
 
 </head>

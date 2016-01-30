@@ -52,7 +52,7 @@ Ext.define("prb-dashboard", {
                 limit: 'Infinity'
             },
             query = this.getSetting('reportQuery') || null;
-        this.logger.log('Query', query);
+        this.logger.log('Query', query, 'Fetch', fetchFields);
         if (query){
             storeConfig.filters = Rally.data.wsapi.Filter.fromQueryString(query);
         }
@@ -63,7 +63,7 @@ Ext.define("prb-dashboard", {
         });
 
     },
-    _addParentFilter: function(items){
+    _addParentFilter: function(ct, items){
 
         var noParentString = this.getSetting('noParentString'),
             parents = _.uniq(_.map(items, function(item){ return item.Parent && item.Parent.Name || noParentString;}));
@@ -77,7 +77,7 @@ Ext.define("prb-dashboard", {
         this.logger.log('_addParentFilter', parents);
 
 
-        var cb = this.add({
+        var cb = ct.add({
             xtype: 'rallycombobox',
             fieldLabel: 'BU/CRG',
             labelAlign: 'right',
@@ -105,10 +105,40 @@ Ext.define("prb-dashboard", {
 
         this.portfolioItems = items;
 
-        this._addParentFilter(items);
+        this._addHeaderComponents(items);
 
        this._updateReport();
 
+    },
+    _addHeaderComponents: function(items){
+
+        var ct = this.add({
+            xtype: 'container',
+            layout: 'hbox'
+        });
+
+        this._addParentFilter(ct, items);
+
+        ct.add({
+            xtype: 'container',
+            margin: '0 25 25 25',
+            itemId: 'ct-num-items',
+            flex: 1,
+            tpl: '<tpl>{count} items found.</tpl>'
+        });
+
+        ct.add({
+            xtype: 'container',
+            margin: '0 25 25 100',
+            itemId: 'ct-project-health-key',
+            flex: 1,
+            html: 'Project Health Key: <span style="text-decoration:underline;"><b>T</b></span>imeline, <span style="text-decoration:underline;"><b>S</b></span>cope, <span style="text-decoration:underline;"><b>Q</b></span>uality, <span style="text-decoration:underline;"><b>R</b></span>esources, <span style="text-decoration:underline;"><b>B</b></span>udget Spend, <span style="text-decoration:underline;"><b>C</b></span>hange'
+        });
+
+
+    },
+    getPRBView: function(){
+        return false;
     },
     _updateReport: function(cb){
 
@@ -133,6 +163,7 @@ Ext.define("prb-dashboard", {
 
         tplConfig.maxChars = this.getSetting('maxChars');
         tplConfig.noParentString = noParentString;
+        tplConfig.prbView = this.getPRBView();
 
         var tpl = new Rally.technicalservices.prbDashboard.Template(tplConfig);
 
@@ -143,9 +174,11 @@ Ext.define("prb-dashboard", {
             margin: '0 100 0 100',
             flex: 1
         }).update(filteredItems);
+        this.down('#ct-num-items').update({count: filteredItems.length});
 
+        console.log('html', this.down('#tpl-report').getEl().dom.innerHTML);
     },
-    getOptions: function() {
+       getOptions: function() {
         return [
             {
                 text: 'About...',

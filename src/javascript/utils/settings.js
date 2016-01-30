@@ -27,7 +27,8 @@ Ext.define('Rally.technicalservices.prbDashboard.Settings',{
             projectHealthChangeField: 'Project Health Change Field',
             totalBudgetField: 'Total Budget Field',
             budgetSpentField: 'Budget Spent Field',
-            linkField: 'Status Report Link Field'
+            linkField: 'Status Report Link Field',
+            questionField: 'Questions'
         },
 
         getFields: function (model) {
@@ -35,13 +36,15 @@ Ext.define('Rally.technicalservices.prbDashboard.Settings',{
                 fields = [];
 
 
+            console.log('model', model);
             fields.push({
                 xtype: 'textarea',
-                fieldLabel: 'Query',
+                fieldLabel: model.replace('PortfolioItem/', '') + ' Query',
                 name: 'reportQuery',
                 anchor: '100%',
                 cls: 'query-field',
                 margin: '0 70 25 0',
+                labelWidth: 150,
                 plugins: [
                     {
                         ptype: 'rallyhelpfield',
