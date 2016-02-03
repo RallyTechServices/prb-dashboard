@@ -3,10 +3,10 @@
 <head>
     <title>PRB Dashboard</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Wed Feb 03 2016 11:28:21 GMT-0700 (MST) -->
+    <!--  Build Date: Wed Feb 03 2016 11:40:02 GMT-0700 (MST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Wed Feb 03 2016 11:28:21 GMT-0700 (MST)";
+        var APP_BUILD_DATE = "Wed Feb 03 2016 11:40:02 GMT-0700 (MST)";
         var CHECKSUM = [%= checksum %];
     </script>
     
@@ -55,7 +55,10 @@ th.prb {
 }
 
 td.prb {
-    padding: 10px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    padding-left: 10px;
+    padding-right: 10px;
     font-family: ProximaNova, Helvetica, Arial;
 }
 

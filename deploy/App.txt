@@ -3,11 +3,11 @@
 <head>
     <title>PRB Dashboard</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Wed Feb 03 2016 11:28:21 GMT-0700 (MST) -->
+    <!--  Build Date: Wed Feb 03 2016 11:40:02 GMT-0700 (MST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Wed Feb 03 2016 11:28:21 GMT-0700 (MST)";
-        var CHECKSUM = 18254041850;
+        var APP_BUILD_DATE = "Wed Feb 03 2016 11:40:02 GMT-0700 (MST)";
+        var CHECKSUM = 18461893069;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -324,7 +324,7 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
                        '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthChangeField, values)]};">C</td>',
                     '</tr><tpl else>',  //ITC View
                        '<tr>',
-                            '<td class="prb" style="width:2%;background-color:{[this.getHealthColor(this.projectHealthField, values)]};">H</td>',
+                            '<td class="prb" style="width:2%;padding-left:0px;padding-right:0px;text-align:center;background-color:{[this.getHealthColor(this.projectHealthField, values)]};">H</td>',
                             '<td class="prb" colspan="5"><tpl if="values[this.budgetSpentField]">{[this.getStringValue(values[this.budgetSpentField])]}<tpl if="values[this.totalBudgetField]"> of {[this.getStringValue(values[this.totalBudgetField])]}</tpl></tpl></td>',
                        '</tr>',
                     '</tpl>',
@@ -744,7 +744,10 @@ th.prb {
 }
 
 td.prb {
-    padding: 10px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    padding-left: 10px;
+    padding-right: 10px;
     font-family: ProximaNova, Helvetica, Arial;
 }
 

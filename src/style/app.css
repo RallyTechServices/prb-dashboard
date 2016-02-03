@@ -29,7 +29,10 @@ th.prb {
 }
 
 td.prb {
-    padding: 10px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    padding-left: 10px;
+    padding-right: 10px;
     font-family: ProximaNova, Helvetica, Arial;
 }
 
