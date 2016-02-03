@@ -3,11 +3,11 @@
 <head>
     <title>PRB Dashboard</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Tue Jan 26 2016 14:00:26 GMT-0700 (MST) -->
+    <!--  Build Date: Wed Feb 03 2016 11:28:21 GMT-0700 (MST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Tue Jan 26 2016 14:00:26 GMT-0700 (MST)";
-        var CHECKSUM = 8825339603;
+        var APP_BUILD_DATE = "Wed Feb 03 2016 11:28:21 GMT-0700 (MST)";
+        var CHECKSUM = 18254041850;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -176,10 +176,59 @@ Ext.define('Rally.technicalservices.Logger',{
 
 });
 
+Ext.define('Rally.technicalservices.window.PRBPrint',{
+    extend: 'Ext.Window',
+    logger: new Rally.technicalservices.Logger(),
+    truncateText: '...',
+    config: {
+        title: 'Print PRB Report',
+        records: null,
+        styleSheetTitle: "printPRB",
+        currentDocument: null,
+        /**
+         *  Array of the following:
+         *  dataIndex
+         *  maxLength (default 0)
+         *  cls (defaults are: card-title, content,
+         */
+        displayFields: null,
+    },
+    constructor: function(config){
+        this.initConfig(config);
+    },
+    show: function(html){
+        var options = "toolbar=1,menubar=1,scrollbars=yes,scrolling=yes,resizable=yes,width=1000,height=500";
+        var win = window.open('',this.title);
+
+
+        win.document.write('<html><head><title>' + this.title + '</title>');
+        win.document.write('<style>');
+        win.document.write(this._getStyleSheet(this.styleSheetTitle));
+        win.document.write('</style>');
+        win.document.write('</head><body class="landscape">');
+        win.document.write(html);
+        win.document.write('</body></html>');
+    },
+
+    _getStyleSheet: function(styleSheetTitle) {
+        this.logger.log('getStyleSheet');
+        var styleSheet;
+
+        var elems = this.currentDocument.query('style');
+
+        for (var i=0; i< elems.length; i++){
+            if (elems[i].title == styleSheetTitle){
+                styleSheet = elems[i];
+            }
+        }
+        return styleSheet.innerHTML;
+    },
+});
 Ext.define('Rally.technicalservices.prbDashboard.Template',{
     extend: 'Ext.XTemplate',
 
     tbdText: 'TBD',
+    prbView: 'prb',
 
     getHealthColor: function(field, values){
         var re = /color=\"(.*)\"/i,
@@ -210,56 +259,75 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
         return null;
     },
     getStringValue: function(text){
-        return Ext.String.ellipsis(text, this.maxChars, true);
-    },
+        if (text){
+            return Ext.String.ellipsis(text, this.maxChars, true);
+        }
+        return '&nbsp;';
 
+    },
+    getTitleRowSpan: function(){
+        if (this.showPRBView()){
+            return 3;
+        }
+        return 2;
+    },
+    showPRBView: function(){
+        return this.prbView === 'prb';
+    },
     constructor: function(config) {
        var templateConfig = [
-           '<tpl foreach=".">',
+           '<tpl>',
            '<table class="prb">',
                 '<tr>',
                     '<th class="prb" width="25%">BU/CRG - Project Title</th>',
                     '<th class="prb" width="25%">Sponsors (S), (EC)</br>Project Manager (PM), BU Lead (BL)</th>',
                     '<th class="prb" width="15%">Start Date (S)</br>Release (R)</br>End Date (E)</th>',
                     '<th class="prb" width="20%">Next Key Milestone</th>',
-                    '<th class="prb" colspan="6">Project Health:</br><span style="text-decoration:underline;">T</span>imeline, <em>S</em>cope, <em>Q</em>uality, <em>R</em>esources, <em>B</em>udget Spend, <em>C</em>hange (BU/CRG)</th>',
+                    '<th class="prb" colspan="6"><b>Project Health & Budget Spend:</b></br>(w/IT Cmte ask if needed)</th>',
                 '</tr>',
-                '<tr>',
-                    '<td class="prb" rowspan="2">{[this.getProjectTitle(values)]}</td>',
-                    '<td class="prb">',
-                        '<tpl if="values[this.sponsorField]">{[this.getStringValue(values[this.sponsorField])]} (S)</br></tpl>',
-                        '<tpl if="values[this.ecField]">{[this.getStringValue(values[this.ecField])]} (EC)</br></tpl>',
-                        '<tpl if="values[this.pmField]">{[this.getStringValue(values[this.pmField])]} (PM)</br></tpl>',
-                        '<tpl if="values[this.blField]">{[this.getStringValue(values[this.blField])]} (BL)</br></tpl>',
-                    '</td>',
-                    '<td class="prb">',
-                        '<tpl if="values[this.startDateField]">{[this.getFormattedDate(this.startDateField, values)]}<tpl else>{[this.tbdText]}</tpl> (S)</br>',
-                        '<tpl if="values[this.releaseDateField]">{[this.getFormattedDate(this.releaseDateField, values)]}<tpl else>{[this.tbdText]}</tpl> (R)</br>',
-                        '<tpl if="values[this.endDateField]">{[this.getFormattedDate(this.endDateField, values)]}<tpl else>{[this.tbdText]}</tpl> (E)</br>',
-                    '</td>',
-                    '<td class="prb">{[this.getStringValue(values[this.nextKeyMilestoneField])]}</td>',
-                    '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthField, values)]};">H</td>',
-                    '<td class="prb" colspan="5">{[this.getStringValue(values[this.budgetSpentField])]}</td>',
-                '</tr>',
-               '<tr>',
-                   '<td class="prb">',
-                       '<tpl if="values[this.vsmField]">{[this.getStringValue(values[this.vsmField])]} (VSM),</tpl>',
-                       '<tpl if="values[this.sltField]">{[this.getStringValue(values[this.sltField])]} (SLT)</tpl>',
-                   '</td>',
-                   '<td class="prb">',
-                       '<tpl if="values[this.linkField]"><a href="{[values[this.linkField]]}">Status Report</a></tpl>',
-                   '</td>',
-                   '<td class="prb">',
-                        '<tpl if="values[this.budgetField]">Total Budget:  {[this.getStringValue(values[this.totalBudgetField])]}</tpl>',
-                    '</td>',
-                   '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthTimelineField, values)]};">T</td>',
-                   '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthScopeField, values)]};">S</td>',
-                   '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthQualityField, values)]};">Q</td>',
-                   '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthResourcesField, values)]};">R</td>',
-                   '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthBudgetSpendField, values)]};">B</td>',
-                   '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthChangeField, values)]};">C</td>',
-           '</tr>',
-           '</table>',
+                '<tpl foreach=".">',
+                    '<tr>',
+                        '<td class="prb" rowspan="{[this.getTitleRowSpan()]}">{[this.getProjectTitle(values)]}</td>',
+                        '<td class="prb" rowspan="2">',
+                            '<tpl if="values[this.sponsorField]">{[this.getStringValue(values[this.sponsorField])]} (S)</br></tpl>',
+                            '<tpl if="values[this.ecField]">{[this.getStringValue(values[this.ecField])]} (EC)</br></tpl>',
+                            '<tpl if="values[this.pmField]">{[this.getStringValue(values[this.pmField])]} (PM)</br></tpl>',
+                            '<tpl if="values[this.blField]">{[this.getStringValue(values[this.blField])]} (BL)</br></tpl>',
+                        '</td>',
+                        '<td class="prb" rowspan="2">',
+                            '<tpl if="values[this.startDateField]">{[this.getFormattedDate(this.startDateField, values)]}<tpl else>{[this.tbdText]}</tpl> (S)</br>',
+                            '<tpl if="values[this.releaseDateField]">{[this.getFormattedDate(this.releaseDateField, values)]}<tpl else>{[this.tbdText]}</tpl> (R)</br>',
+                            '<tpl if="values[this.endDateField]">{[this.getFormattedDate(this.endDateField, values)]}<tpl else>{[this.tbdText]}</tpl> (E)</br>',
+                        '</td>',
+                        '<td class="prb" rowspan="2">{[this.getStringValue(values[this.nextKeyMilestoneField])]}</td>',
+                        '<td class="prb" colspan="6"><tpl if="values[this.questionField]">{[this.getStringValue(values[this.questionField])]}</tpl></td>',
+                    '</tr>',
+                   '<tpl if="this.showPRBView()">',
+                       '<tr>',
+                           '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthField, values)]};">H</td>',
+                           '<td class="prb" colspan="5"><tpl if="values[this.budgetSpentField]">{[this.getStringValue(values[this.budgetSpentField])]}<tpl if="values[this.totalBudgetField]"> of {[this.getStringValue(values[this.totalBudgetField])]}</tpl></tpl></td>',
+                       '</tr><tr>',
+                       '<td class="prb">',
+                           '<tpl if="values[this.vsmField]">{[this.getStringValue(values[this.vsmField])]} (VSM),</tpl>',
+                           '<tpl if="values[this.sltField]">{[this.getStringValue(values[this.sltField])]} (SLT)</tpl>',
+                       '</td>',
+                       '<td class="prb">',
+                           '<tpl if="values[this.linkField]"><a href="{[values[this.linkField]]}" target="_blank">Status Report</a></tpl>',
+                       '</td>',
+                       '<td class="prb">',
+                        '</td>',
+                       '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthTimelineField, values)]};">T</td>',
+                       '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthScopeField, values)]};">S</td>',
+                       '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthQualityField, values)]};">Q</td>',
+                       '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthResourcesField, values)]};">R</td>',
+                       '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthBudgetSpendField, values)]};">B</td>',
+                       '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthChangeField, values)]};">C</td>',
+                    '</tr><tpl else>',  //ITC View
+                       '<tr>',
+                            '<td class="prb" style="width:2%;background-color:{[this.getHealthColor(this.projectHealthField, values)]};">H</td>',
+                            '<td class="prb" colspan="5"><tpl if="values[this.budgetSpentField]">{[this.getStringValue(values[this.budgetSpentField])]}<tpl if="values[this.totalBudgetField]"> of {[this.getStringValue(values[this.totalBudgetField])]}</tpl></tpl></td>',
+                       '</tr>',
+                    '</tpl>',
            '</tpl>'
        ];
 
@@ -329,21 +397,22 @@ Ext.define('Rally.technicalservices.prbDashboard.Settings',{
             projectHealthChangeField: 'Project Health Change Field',
             totalBudgetField: 'Total Budget Field',
             budgetSpentField: 'Budget Spent Field',
-            linkField: 'Status Report Link Field'
+            linkField: 'Status Report Link Field',
+            questionField: 'Ask of ITC'
         },
 
-        getFields: function (model) {
+        getFields: function (model, modelDisplayName) {
             var labelWidth = 250,
                 fields = [];
 
-
             fields.push({
                 xtype: 'textarea',
-                fieldLabel: 'Query',
+                fieldLabel: modelDisplayName + ' Query',
                 name: 'reportQuery',
                 anchor: '100%',
                 cls: 'query-field',
                 margin: '0 70 25 0',
+                labelWidth: 150,
                 plugins: [
                     {
                         ptype: 'rallyhelpfield',
@@ -452,7 +521,7 @@ Ext.define("prb-dashboard", {
                 limit: 'Infinity'
             },
             query = this.getSetting('reportQuery') || null;
-        this.logger.log('Query', query);
+        this.logger.log('Query', query, 'Fetch', fetchFields);
         if (query){
             storeConfig.filters = Rally.data.wsapi.Filter.fromQueryString(query);
         }
@@ -463,7 +532,7 @@ Ext.define("prb-dashboard", {
         });
 
     },
-    _addParentFilter: function(items){
+    _addParentFilter: function(ct, items){
 
         var noParentString = this.getSetting('noParentString'),
             parents = _.uniq(_.map(items, function(item){ return item.Parent && item.Parent.Name || noParentString;}));
@@ -477,10 +546,11 @@ Ext.define("prb-dashboard", {
         this.logger.log('_addParentFilter', parents);
 
 
-        var cb = this.add({
+        var cb = ct.add({
             xtype: 'rallycombobox',
             fieldLabel: 'BU/CRG',
             labelAlign: 'right',
+            itemId: 'cb-bu',
             store: Ext.create('Rally.data.custom.Store',{
                 fields: ['name','value'],
                 data: parents
@@ -493,6 +563,24 @@ Ext.define("prb-dashboard", {
             width: 500
         });
         cb.on('change', this._updateReport, this);
+
+        var cbView = ct.add({
+            xtype: 'rallycombobox',
+            fieldLabel: 'View',
+            itemId: 'cb-view',
+            labelAlign: 'right',
+            store: Ext.create('Rally.data.custom.Store',{
+                fields: ['name','value'],
+                data: [{ name: 'PRB View', value: 'prb' },{ name:'ITC View', value: 'itc'}]
+            }),
+            displayField: 'name',
+            valueField: 'value',
+            allowNoEntry: false,
+            noEntryText: '-- No BU/CRG --',
+            width: 250
+        });
+        cbView.on('change', this._updateReport, this);
+
     },
     runReport: function(portfolioItems, operation){
         this.logger.log('_runReport', portfolioItems, operation);
@@ -505,14 +593,51 @@ Ext.define("prb-dashboard", {
 
         this.portfolioItems = items;
 
-        this._addParentFilter(items);
+        this._addHeaderComponents(items);
 
        this._updateReport();
 
     },
-    _updateReport: function(cb){
+    _addHeaderComponents: function(items){
 
-        var filters = cb && cb.getValue() || [];
+        var ct = this.add({
+            xtype: 'container',
+            layout: 'hbox'
+        });
+
+        this._addParentFilter(ct, items);
+
+        ct.add({
+            xtype: 'container',
+            margin: '0 15 15 15',
+            itemId: 'ct-num-items',
+            flex: 1,
+            tpl: '<tpl>{count} items found.</tpl>'
+        });
+
+        ct.add({
+            xtype: 'container',
+            margin: '0 0 0 0',
+            itemId: 'ct-project-health-key',
+            flex: 1,
+            html: 'Project Health Key: <span style="text-decoration:underline;"><b>T</b></span>imeline, <span style="text-decoration:underline;"><b>S</b></span>cope, <span style="text-decoration:underline;"><b>Q</b></span>uality, <span style="text-decoration:underline;"><b>R</b></span>esources, <span style="text-decoration:underline;"><b>B</b></span>udget Spend, <span style="text-decoration:underline;"><b>C</b></span>hange'
+        });
+
+
+    },
+    getPRBView: function(){
+        return this.down('#cb-view') && this.down('#cb-view').getValue() || 'prb';
+    },
+    _printPrb: function(){
+        var win = Ext.create('Rally.technicalservices.window.PRBPrint',{
+            currentDocument: Ext.getDoc()
+        });
+        win.show(this.down('#tpl-report').getEl().dom.innerHTML);
+    },
+    _updateReport: function(){
+
+        var cb = this.down('#cb-bu'),
+            filters = cb && cb.getValue() || [];
 
         var filteredItems = this.portfolioItems;
         if (filters.length > 0){
@@ -533,6 +658,7 @@ Ext.define("prb-dashboard", {
 
         tplConfig.maxChars = this.getSetting('maxChars');
         tplConfig.noParentString = noParentString;
+        tplConfig.prbView = this.getPRBView();
 
         var tpl = new Rally.technicalservices.prbDashboard.Template(tplConfig);
 
@@ -543,19 +669,24 @@ Ext.define("prb-dashboard", {
             margin: '0 100 0 100',
             flex: 1
         }).update(filteredItems);
-
+        this.down('#ct-num-items').update({count: filteredItems.length});
     },
-    getOptions: function() {
+       getOptions: function() {
         return [
             {
                 text: 'About...',
                 handler: this._launchInfo,
                 scope: this
+            },{
+                text: 'Print...',
+                handler: this._printPrb,
+                scope: this
             }
         ];
     },
     getSettingsFields: function(){
-        return Rally.technicalservices.prbDashboard.Settings.getFields(this.getSetting('model'));
+        var modelDisplayName = "Program or Project";
+        return Rally.technicalservices.prbDashboard.Settings.getFields(this.getSetting('model'),modelDisplayName);
     },
     _launchInfo: function() {
         if ( this.about_dialog ) { this.about_dialog.destroy(); }
@@ -620,6 +751,210 @@ td.prb {
 .prb {
     border: 1px solid black;
 }
+
+span.prb {
+    padding: 10px;
+
+}
+
+<style type="text/css" title="printPRB">
+/* PLEASE LEAVE THIS STYLESHEET INLINE SINCE TITLE IS NECESSARY */
+@media print {
+    #interface {
+        display: none;
+    }
+
+    .pb {
+        page-break-after: always;
+        clear: both;
+    }
+}
+
+#interface, #printSection {
+    margin: 20px;
+}
+
+html {
+    background-color: #fff;
+    color: #000;
+    font: 11pt / 1.26 Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #fff;
+    margin: 25;
+    padding: 0;
+
+}
+
+
+table.prb{
+    border-collapse: collapse;
+    width: 100%;
+    margin: 0.1in 0.1in 0.1in 0.1in;
+}
+
+th.prb {
+    background-color: #c0c0c0;
+    padding: 5px;
+    font-family: ProximaNovaSemiBold, Helvetica, Arial;
+}
+
+td.prb {
+    padding: 10px;
+    font-family: ProximaNova, Helvetica, Arial;
+}
+
+.prb {
+    border: 1px solid black;
+}
+
+.artifact {
+    background-color: #fff;
+    border: 2px solid #000;
+    float: left;
+    height: 3.2in;
+    margin: 0.1in 0.1in 0.1in 0.1in;
+    position: relative;
+    overflow: hidden;
+    width: 4.3in;
+}
+.r1 {
+    border: 1px;
+    border-bottom-style: solid;
+    height: 40px;
+    font-family: NotoSans, Helvetica, Arial;
+    font-size: 12pt;
+    background-color: #6699cc;
+    color: #FFFFFF;
+}
+.r1left {
+    display: table-cell;
+    padding-top: 0.5em;
+    width: 2.8in;
+    height: 40px;
+    padding-left: 0.5em;
+    border-right: 1px solid #000;
+}
+.r1right {
+    display: table-cell;
+    padding-top: 0.5em;
+    width: 1.5in;
+    padding-left: 0.5em;
+}
+.r2{
+    border: 1px;
+    border-bottom-style: solid;
+    height: 40px;
+    font-family: NotoSans, Helvetica, Arial;
+    font-size: 10pt;
+    background-color: #d9e6f2;
+}
+.r2left {
+    display: table-cell;
+    width: 1.3in;
+    padding-top: 0.5em;
+    padding-left: 0.5em;
+    height: 40px;
+    border-right: 1px solid #000;
+}
+.r2middle {
+    display: table-cell;
+    width: 1.4in;
+    padding-top: 0.5em;
+    height: 40px;
+    padding-left: 0.5em;
+    border-right: 1px solid #000;
+}
+.r2right {
+    display: table-cell;
+    padding-top: 0.5em;
+    padding-left: 0.5em;
+    width: 1.5in;
+}
+.r3{
+    border: 1px;
+    border-bottom-style: solid;
+    height: 120px;
+    font-family: NotoSans, Helvetica, Arial;
+    font-size: 12pt;
+}
+.r3middle {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+}
+.r4{
+    border: 1px;
+    border-bottom-style: solid;
+    height: 120px;
+    font-family: NotoSans, Helvetica, Arial;
+    font-size: 12pt;
+}
+.r4middle {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+}
+.header {
+    border: 1px;
+    border-bottom-style: solid;
+    display: table-cell;
+    height: 40px;
+    vertical-align: middle;
+    width: 4.3in;
+}
+
+.card-title {
+    font: bold 28px Genova, sans-serif;
+    padding-top: 0.5em;
+    text-align: center;
+}
+
+.description {
+    float: left;
+    font: 12pt Georgia, sans-serif;
+    margin: 0.25em auto 0 auto;
+    padding-left: 1.0em;
+    padding-right: 1.0em;
+    overflow-y: hidden;
+    width: 100%;
+    word-wrap: break-word;
+}
+
+.owner {
+    float: right;
+    height: 40px;
+}
+
+.ownerText {
+    float: right;
+    font: 14pt / 1.26 Arial, Helvetica, sans-serif;
+    margin-right: 0.3em;
+    margin-top: 0.3em;
+}
+
+.card-id {
+    float: left;
+    font: 14pt / 1.26 Arial, Helvetica, sans-serif;
+    margin-left: 0.25em;
+    margin-top: 0.3em;
+}
+
+.estimate {
+    bottom: 0.5em;
+    position: absolute;
+    right: 0.5em;
+}
+
+.content {
+    height: 2.4in;
+    overflow: hidden;
+    width: 4.3in;
+}
+</style>
     </style>
 
 </head>
