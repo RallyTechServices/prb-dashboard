@@ -3,11 +3,11 @@
 <head>
     <title>PRB Dashboard</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Wed Feb 03 2016 09:56:33 GMT-0700 (MST) -->
+    <!--  Build Date: Wed Feb 03 2016 11:28:21 GMT-0700 (MST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Wed Feb 03 2016 09:56:33 GMT-0700 (MST)";
-        var CHECKSUM = 17446697495;
+        var APP_BUILD_DATE = "Wed Feb 03 2016 11:28:21 GMT-0700 (MST)";
+        var CHECKSUM = 18254041850;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -259,7 +259,11 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
         return null;
     },
     getStringValue: function(text){
-        return Ext.String.ellipsis(text, this.maxChars, true);
+        if (text){
+            return Ext.String.ellipsis(text, this.maxChars, true);
+        }
+        return '&nbsp;';
+
     },
     getTitleRowSpan: function(){
         if (this.showPRBView()){
@@ -298,11 +302,11 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
                         '<td class="prb" rowspan="2">{[this.getStringValue(values[this.nextKeyMilestoneField])]}</td>',
                         '<td class="prb" colspan="6"><tpl if="values[this.questionField]">{[this.getStringValue(values[this.questionField])]}</tpl></td>',
                     '</tr>',
-                   '<tr>',
-                        '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthField, values)]};">H</td>',
-                        '<td class="prb" colspan="5"><tpl if="values[this.budgetSpentField]">{[this.getStringValue(values[this.budgetSpentField])]}</tpl> of <tpl if="values[this.totalBudgetField]">{[this.getStringValue(values[this.totalBudgetField])]}</tpl></td>',
-                   '</tr>',
-                   '<tpl if="this.showPRBView()"><tr>',
+                   '<tpl if="this.showPRBView()">',
+                       '<tr>',
+                           '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthField, values)]};">H</td>',
+                           '<td class="prb" colspan="5"><tpl if="values[this.budgetSpentField]">{[this.getStringValue(values[this.budgetSpentField])]}<tpl if="values[this.totalBudgetField]"> of {[this.getStringValue(values[this.totalBudgetField])]}</tpl></tpl></td>',
+                       '</tr><tr>',
                        '<td class="prb">',
                            '<tpl if="values[this.vsmField]">{[this.getStringValue(values[this.vsmField])]} (VSM),</tpl>',
                            '<tpl if="values[this.sltField]">{[this.getStringValue(values[this.sltField])]} (SLT)</tpl>',
@@ -318,9 +322,12 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
                        '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthResourcesField, values)]};">R</td>',
                        '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthBudgetSpendField, values)]};">B</td>',
                        '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthChangeField, values)]};">C</td>',
-                    '</tr></tpl>',
-            '</tpl>',
-           '</table>',
+                    '</tr><tpl else>',  //ITC View
+                       '<tr>',
+                            '<td class="prb" style="width:2%;background-color:{[this.getHealthColor(this.projectHealthField, values)]};">H</td>',
+                            '<td class="prb" colspan="5"><tpl if="values[this.budgetSpentField]">{[this.getStringValue(values[this.budgetSpentField])]}<tpl if="values[this.totalBudgetField]"> of {[this.getStringValue(values[this.totalBudgetField])]}</tpl></tpl></td>',
+                       '</tr>',
+                    '</tpl>',
            '</tpl>'
        ];
 
@@ -391,18 +398,16 @@ Ext.define('Rally.technicalservices.prbDashboard.Settings',{
             totalBudgetField: 'Total Budget Field',
             budgetSpentField: 'Budget Spent Field',
             linkField: 'Status Report Link Field',
-            questionField: 'Questions'
+            questionField: 'Ask of ITC'
         },
 
-        getFields: function (model) {
+        getFields: function (model, modelDisplayName) {
             var labelWidth = 250,
                 fields = [];
 
-
-            console.log('model', model);
             fields.push({
                 xtype: 'textarea',
-                fieldLabel: model.replace('PortfolioItem/', '') + ' Query',
+                fieldLabel: modelDisplayName + ' Query',
                 name: 'reportQuery',
                 anchor: '100%',
                 cls: 'query-field',
@@ -680,7 +685,8 @@ Ext.define("prb-dashboard", {
         ];
     },
     getSettingsFields: function(){
-        return Rally.technicalservices.prbDashboard.Settings.getFields(this.getSetting('model'));
+        var modelDisplayName = "Program or Project";
+        return Rally.technicalservices.prbDashboard.Settings.getFields(this.getSetting('model'),modelDisplayName);
     },
     _launchInfo: function() {
         if ( this.about_dialog ) { this.about_dialog.destroy(); }
@@ -745,6 +751,12 @@ td.prb {
 .prb {
     border: 1px solid black;
 }
+
+span.prb {
+    padding: 10px;
+
+}
+
 <style type="text/css" title="printPRB">
 /* PLEASE LEAVE THIS STYLESHEET INLINE SINCE TITLE IS NECESSARY */
 @media print {

@@ -28,18 +28,16 @@ Ext.define('Rally.technicalservices.prbDashboard.Settings',{
             totalBudgetField: 'Total Budget Field',
             budgetSpentField: 'Budget Spent Field',
             linkField: 'Status Report Link Field',
-            questionField: 'Questions'
+            questionField: 'Ask of ITC'
         },
 
-        getFields: function (model) {
+        getFields: function (model, modelDisplayName) {
             var labelWidth = 250,
                 fields = [];
 
-
-            console.log('model', model);
             fields.push({
                 xtype: 'textarea',
-                fieldLabel: model.replace('PortfolioItem/', '') + ' Query',
+                fieldLabel: modelDisplayName + ' Query',
                 name: 'reportQuery',
                 anchor: '100%',
                 cls: 'query-field',

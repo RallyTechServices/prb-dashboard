@@ -33,7 +33,11 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
         return null;
     },
     getStringValue: function(text){
-        return Ext.String.ellipsis(text, this.maxChars, true);
+        if (text){
+            return Ext.String.ellipsis(text, this.maxChars, true);
+        }
+        return '&nbsp;';
+
     },
     getTitleRowSpan: function(){
         if (this.showPRBView()){
@@ -72,11 +76,11 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
                         '<td class="prb" rowspan="2">{[this.getStringValue(values[this.nextKeyMilestoneField])]}</td>',
                         '<td class="prb" colspan="6"><tpl if="values[this.questionField]">{[this.getStringValue(values[this.questionField])]}</tpl></td>',
                     '</tr>',
-                   '<tr>',
-                        '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthField, values)]};">H</td>',
-                        '<td class="prb" colspan="5"><tpl if="values[this.budgetSpentField]">{[this.getStringValue(values[this.budgetSpentField])]}</tpl> of <tpl if="values[this.totalBudgetField]">{[this.getStringValue(values[this.totalBudgetField])]}</tpl></td>',
-                   '</tr>',
-                   '<tpl if="this.showPRBView()"><tr>',
+                   '<tpl if="this.showPRBView()">',
+                       '<tr>',
+                           '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthField, values)]};">H</td>',
+                           '<td class="prb" colspan="5"><tpl if="values[this.budgetSpentField]">{[this.getStringValue(values[this.budgetSpentField])]}<tpl if="values[this.totalBudgetField]"> of {[this.getStringValue(values[this.totalBudgetField])]}</tpl></tpl></td>',
+                       '</tr><tr>',
                        '<td class="prb">',
                            '<tpl if="values[this.vsmField]">{[this.getStringValue(values[this.vsmField])]} (VSM),</tpl>',
                            '<tpl if="values[this.sltField]">{[this.getStringValue(values[this.sltField])]} (SLT)</tpl>',
@@ -92,9 +96,12 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
                        '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthResourcesField, values)]};">R</td>',
                        '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthBudgetSpendField, values)]};">B</td>',
                        '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthChangeField, values)]};">C</td>',
-                    '</tr></tpl>',
-            '</tpl>',
-           '</table>',
+                    '</tr><tpl else>',  //ITC View
+                       '<tr>',
+                            '<td class="prb" style="width:2%;background-color:{[this.getHealthColor(this.projectHealthField, values)]};">H</td>',
+                            '<td class="prb" colspan="5"><tpl if="values[this.budgetSpentField]">{[this.getStringValue(values[this.budgetSpentField])]}<tpl if="values[this.totalBudgetField]"> of {[this.getStringValue(values[this.totalBudgetField])]}</tpl></tpl></td>',
+                       '</tr>',
+                    '</tpl>',
            '</tpl>'
        ];
 

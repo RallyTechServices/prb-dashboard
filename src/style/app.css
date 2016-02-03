@@ -36,3 +36,8 @@ td.prb {
 .prb {
     border: 1px solid black;
 }
+
+span.prb {
+    padding: 10px;
+
+}
