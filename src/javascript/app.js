@@ -81,6 +81,7 @@ Ext.define("prb-dashboard", {
             xtype: 'rallycombobox',
             fieldLabel: 'BU/CRG',
             labelAlign: 'right',
+            itemId: 'cb-bu',
             store: Ext.create('Rally.data.custom.Store',{
                 fields: ['name','value'],
                 data: parents
@@ -93,6 +94,24 @@ Ext.define("prb-dashboard", {
             width: 500
         });
         cb.on('change', this._updateReport, this);
+
+        var cbView = ct.add({
+            xtype: 'rallycombobox',
+            fieldLabel: 'View',
+            itemId: 'cb-view',
+            labelAlign: 'right',
+            store: Ext.create('Rally.data.custom.Store',{
+                fields: ['name','value'],
+                data: [{ name: 'PRB View', value: 'prb' },{ name:'ITC View', value: 'itc'}]
+            }),
+            displayField: 'name',
+            valueField: 'value',
+            allowNoEntry: false,
+            noEntryText: '-- No BU/CRG --',
+            width: 250
+        });
+        cbView.on('change', this._updateReport, this);
+
     },
     runReport: function(portfolioItems, operation){
         this.logger.log('_runReport', portfolioItems, operation);
@@ -121,7 +140,7 @@ Ext.define("prb-dashboard", {
 
         ct.add({
             xtype: 'container',
-            margin: '0 25 25 25',
+            margin: '0 15 15 15',
             itemId: 'ct-num-items',
             flex: 1,
             tpl: '<tpl>{count} items found.</tpl>'
@@ -129,7 +148,7 @@ Ext.define("prb-dashboard", {
 
         ct.add({
             xtype: 'container',
-            margin: '0 25 25 100',
+            margin: '0 0 0 0',
             itemId: 'ct-project-health-key',
             flex: 1,
             html: 'Project Health Key: <span style="text-decoration:underline;"><b>T</b></span>imeline, <span style="text-decoration:underline;"><b>S</b></span>cope, <span style="text-decoration:underline;"><b>Q</b></span>uality, <span style="text-decoration:underline;"><b>R</b></span>esources, <span style="text-decoration:underline;"><b>B</b></span>udget Spend, <span style="text-decoration:underline;"><b>C</b></span>hange'
@@ -138,11 +157,18 @@ Ext.define("prb-dashboard", {
 
     },
     getPRBView: function(){
-        return false;
+        return this.down('#cb-view') && this.down('#cb-view').getValue() || 'prb';
     },
-    _updateReport: function(cb){
+    _printPrb: function(){
+        var win = Ext.create('Rally.technicalservices.window.PRBPrint',{
+            currentDocument: Ext.getDoc()
+        });
+        win.show(this.down('#tpl-report').getEl().dom.innerHTML);
+    },
+    _updateReport: function(){
 
-        var filters = cb && cb.getValue() || [];
+        var cb = this.down('#cb-bu'),
+            filters = cb && cb.getValue() || [];
 
         var filteredItems = this.portfolioItems;
         if (filters.length > 0){
@@ -175,14 +201,16 @@ Ext.define("prb-dashboard", {
             flex: 1
         }).update(filteredItems);
         this.down('#ct-num-items').update({count: filteredItems.length});
-
-        console.log('html', this.down('#tpl-report').getEl().dom.innerHTML);
     },
        getOptions: function() {
         return [
             {
                 text: 'About...',
                 handler: this._launchInfo,
+                scope: this
+            },{
+                text: 'Print...',
+                handler: this._printPrb,
                 scope: this
             }
         ];

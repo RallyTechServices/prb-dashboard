@@ -3,11 +3,11 @@
 <head>
     <title>PRB Dashboard</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Fri Jan 29 2016 20:37:23 GMT-0700 (MST) -->
+    <!--  Build Date: Wed Feb 03 2016 09:56:33 GMT-0700 (MST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Fri Jan 29 2016 20:37:23 GMT-0700 (MST)";
-        var CHECKSUM = 14546307026;
+        var APP_BUILD_DATE = "Wed Feb 03 2016 09:56:33 GMT-0700 (MST)";
+        var CHECKSUM = 17446697495;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -176,11 +176,59 @@ Ext.define('Rally.technicalservices.Logger',{
 
 });
 
+Ext.define('Rally.technicalservices.window.PRBPrint',{
+    extend: 'Ext.Window',
+    logger: new Rally.technicalservices.Logger(),
+    truncateText: '...',
+    config: {
+        title: 'Print PRB Report',
+        records: null,
+        styleSheetTitle: "printPRB",
+        currentDocument: null,
+        /**
+         *  Array of the following:
+         *  dataIndex
+         *  maxLength (default 0)
+         *  cls (defaults are: card-title, content,
+         */
+        displayFields: null,
+    },
+    constructor: function(config){
+        this.initConfig(config);
+    },
+    show: function(html){
+        var options = "toolbar=1,menubar=1,scrollbars=yes,scrolling=yes,resizable=yes,width=1000,height=500";
+        var win = window.open('',this.title);
+
+
+        win.document.write('<html><head><title>' + this.title + '</title>');
+        win.document.write('<style>');
+        win.document.write(this._getStyleSheet(this.styleSheetTitle));
+        win.document.write('</style>');
+        win.document.write('</head><body class="landscape">');
+        win.document.write(html);
+        win.document.write('</body></html>');
+    },
+
+    _getStyleSheet: function(styleSheetTitle) {
+        this.logger.log('getStyleSheet');
+        var styleSheet;
+
+        var elems = this.currentDocument.query('style');
+
+        for (var i=0; i< elems.length; i++){
+            if (elems[i].title == styleSheetTitle){
+                styleSheet = elems[i];
+            }
+        }
+        return styleSheet.innerHTML;
+    },
+});
 Ext.define('Rally.technicalservices.prbDashboard.Template',{
     extend: 'Ext.XTemplate',
 
     tbdText: 'TBD',
-    prbView: true,
+    prbView: 'prb',
 
     getHealthColor: function(field, values){
         var re = /color=\"(.*)\"/i,
@@ -214,10 +262,13 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
         return Ext.String.ellipsis(text, this.maxChars, true);
     },
     getTitleRowSpan: function(){
-        if (this.prbView){
+        if (this.showPRBView()){
             return 3;
         }
         return 2;
+    },
+    showPRBView: function(){
+        return this.prbView === 'prb';
     },
     constructor: function(config) {
        var templateConfig = [
@@ -225,7 +276,7 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
            '<table class="prb">',
                 '<tr>',
                     '<th class="prb" width="25%">BU/CRG - Project Title</th>',
-                    '<th class="prb" width="20%">Sponsors (S), (EC)</br>Project Manager (PM), BU Lead (BL)</th>',
+                    '<th class="prb" width="25%">Sponsors (S), (EC)</br>Project Manager (PM), BU Lead (BL)</th>',
                     '<th class="prb" width="15%">Start Date (S)</br>Release (R)</br>End Date (E)</th>',
                     '<th class="prb" width="20%">Next Key Milestone</th>',
                     '<th class="prb" colspan="6"><b>Project Health & Budget Spend:</b></br>(w/IT Cmte ask if needed)</th>',
@@ -251,7 +302,7 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
                         '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthField, values)]};">H</td>',
                         '<td class="prb" colspan="5"><tpl if="values[this.budgetSpentField]">{[this.getStringValue(values[this.budgetSpentField])]}</tpl> of <tpl if="values[this.totalBudgetField]">{[this.getStringValue(values[this.totalBudgetField])]}</tpl></td>',
                    '</tr>',
-                   '<tpl if="this.prbView"><tr>',
+                   '<tpl if="this.showPRBView()"><tr>',
                        '<td class="prb">',
                            '<tpl if="values[this.vsmField]">{[this.getStringValue(values[this.vsmField])]} (VSM),</tpl>',
                            '<tpl if="values[this.sltField]">{[this.getStringValue(values[this.sltField])]} (SLT)</tpl>',
@@ -494,6 +545,7 @@ Ext.define("prb-dashboard", {
             xtype: 'rallycombobox',
             fieldLabel: 'BU/CRG',
             labelAlign: 'right',
+            itemId: 'cb-bu',
             store: Ext.create('Rally.data.custom.Store',{
                 fields: ['name','value'],
                 data: parents
@@ -506,6 +558,24 @@ Ext.define("prb-dashboard", {
             width: 500
         });
         cb.on('change', this._updateReport, this);
+
+        var cbView = ct.add({
+            xtype: 'rallycombobox',
+            fieldLabel: 'View',
+            itemId: 'cb-view',
+            labelAlign: 'right',
+            store: Ext.create('Rally.data.custom.Store',{
+                fields: ['name','value'],
+                data: [{ name: 'PRB View', value: 'prb' },{ name:'ITC View', value: 'itc'}]
+            }),
+            displayField: 'name',
+            valueField: 'value',
+            allowNoEntry: false,
+            noEntryText: '-- No BU/CRG --',
+            width: 250
+        });
+        cbView.on('change', this._updateReport, this);
+
     },
     runReport: function(portfolioItems, operation){
         this.logger.log('_runReport', portfolioItems, operation);
@@ -534,7 +604,7 @@ Ext.define("prb-dashboard", {
 
         ct.add({
             xtype: 'container',
-            margin: '0 25 25 25',
+            margin: '0 15 15 15',
             itemId: 'ct-num-items',
             flex: 1,
             tpl: '<tpl>{count} items found.</tpl>'
@@ -542,7 +612,7 @@ Ext.define("prb-dashboard", {
 
         ct.add({
             xtype: 'container',
-            margin: '0 25 25 100',
+            margin: '0 0 0 0',
             itemId: 'ct-project-health-key',
             flex: 1,
             html: 'Project Health Key: <span style="text-decoration:underline;"><b>T</b></span>imeline, <span style="text-decoration:underline;"><b>S</b></span>cope, <span style="text-decoration:underline;"><b>Q</b></span>uality, <span style="text-decoration:underline;"><b>R</b></span>esources, <span style="text-decoration:underline;"><b>B</b></span>udget Spend, <span style="text-decoration:underline;"><b>C</b></span>hange'
@@ -551,11 +621,18 @@ Ext.define("prb-dashboard", {
 
     },
     getPRBView: function(){
-        return false;
+        return this.down('#cb-view') && this.down('#cb-view').getValue() || 'prb';
     },
-    _updateReport: function(cb){
+    _printPrb: function(){
+        var win = Ext.create('Rally.technicalservices.window.PRBPrint',{
+            currentDocument: Ext.getDoc()
+        });
+        win.show(this.down('#tpl-report').getEl().dom.innerHTML);
+    },
+    _updateReport: function(){
 
-        var filters = cb && cb.getValue() || [];
+        var cb = this.down('#cb-bu'),
+            filters = cb && cb.getValue() || [];
 
         var filteredItems = this.portfolioItems;
         if (filters.length > 0){
@@ -588,14 +665,16 @@ Ext.define("prb-dashboard", {
             flex: 1
         }).update(filteredItems);
         this.down('#ct-num-items').update({count: filteredItems.length});
-
-        console.log('html', this.down('#tpl-report').getEl().dom.innerHTML);
     },
        getOptions: function() {
         return [
             {
                 text: 'About...',
                 handler: this._launchInfo,
+                scope: this
+            },{
+                text: 'Print...',
+                handler: this._printPrb,
                 scope: this
             }
         ];
@@ -666,184 +745,204 @@ td.prb {
 .prb {
     border: 1px solid black;
 }
-/*<style type="text/css" title="printCards">*/
-/*!* PLEASE LEAVE THIS STYLESHEET INLINE SINCE TITLE IS NECESSARY *!*/
-/*@media print {*/
-    /*#interface {*/
-        /*display: none;*/
-    /*}*/
+<style type="text/css" title="printPRB">
+/* PLEASE LEAVE THIS STYLESHEET INLINE SINCE TITLE IS NECESSARY */
+@media print {
+    #interface {
+        display: none;
+    }
 
-    /*.pb {*/
-        /*page-break-after: always;*/
-        /*clear: both;*/
-    /*}*/
-/*}*/
+    .pb {
+        page-break-after: always;
+        clear: both;
+    }
+}
 
-/*#interface, #printSection {*/
-    /*margin: 20px;*/
-/*}*/
+#interface, #printSection {
+    margin: 20px;
+}
 
-/*html {*/
-    /*background-color: #fff;*/
-    /*color: #000;*/
-    /*font: 14pt / 1.26 Arial, Helvetica, sans-serif;*/
-    /*margin: 0;*/
-    /*padding: 0;*/
-/*}*/
+html {
+    background-color: #fff;
+    color: #000;
+    font: 11pt / 1.26 Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+}
 
-/*body {*/
-    /*background-color: #fff;*/
-    /*margin: 0;*/
-    /*padding: 0;*/
-/*}*/
+body {
+    background-color: #fff;
+    margin: 25;
+    padding: 0;
 
-/*.cb {*/
-    /*clear: both;*/
-/*}*/
+}
 
-/*.artifact {*/
-    /*background-color: #fff;*/
-    /*border: 2px solid #000;*/
-    /*float: left;*/
-    /*height: 3.7in;*/
-    /*margin: 0.1in 0.1in 0.1in 0.1in;*/
-    /*position: relative;*/
-    /*overflow: hidden;*/
-    /*width: 4.9in;*/
-/*}*/
-/*.r1 {*/
-    /*border: 1px;*/
-    /*border-bottom-style: solid;*/
-    /*height: 60px;*/
-    /*font-family: NotoSans, Helvetica, Arial;*/
-    /*font-size: 11pt;*/
-    /*color: #000000;*/
-/*}*/
-/*.r1left {*/
-    /*display: table-cell;*/
-    /*padding-top: 0.5em;*/
-    /*width: 3.6in;*/
-    /*padding-left: 0.5em;*/
-    /*overflow: hidden;*/
-    /*border-right: 1px solid #000;*/
-    /*height: 60px;*/
-/*}*/
-/*.r1right {*/
-    /*display: table-cell;*/
-    /*padding-top: 0.5em;*/
-    /*padding-left: 0.5em;*/
-/*}*/
-/*.r2{*/
-    /*border: 1px;*/
-    /*border-bottom-style: solid;*/
-    /*height: 40px;*/
-    /*font-family: NotoSans, Helvetica, Arial;*/
-    /*font-size: 10pt;*/
-/*}*/
-/*.r2left {*/
-    /*display: table-cell;*/
-    /*width: 1.7in;*/
-    /*padding-top: 0.5em;*/
-    /*padding-left: 0.5em;*/
-    /*border-right: 1px solid #000;*/
-    /*height: 40px;*/
-/*}*/
-/*.r2middle {*/
-    /*display: table-cell;*/
-    /*width: 1.5in;*/
-    /*padding-top: 0.5em;*/
-    /*padding-left: 0.5em;*/
-    /*border-right: 1px solid #000;*/
-/*}*/
-/*.r2right {*/
-    /*display: table-cell;*/
-    /*padding-top: 0.5em;*/
-    /*padding-left: 0.5em;*/
-/*}*/
-/*.r3{*/
-    /*border: 1px;*/
-    /*border-bottom-style: solid;*/
-    /*height: 140px;*/
-    /*font-family: NotoSans, Helvetica, Arial;*/
-    /*font-size: 12pt;*/
-    /*padding-left: 0.5em;*/
-    /*padding-right: 0.5em;*/
-/*}*/
-/*.r3middle {*/
-    /*display: block;*/
-    /*vertical-align: middle;*/
-    /*text-align: left;*/
-/*}*/
-/*.r4{*/
-    /*border: 1px;*/
-    /*border-bottom-style: solid;*/
-    /*height: 120px;*/
-    /*font-family: NotoSans, Helvetica, Arial;*/
-    /*font-size: 12pt;*/
-    /*padding-left: 0.5em;*/
-/*}*/
-/*.r4middle {*/
-    /*display: table-cell;*/
-    /*vertical-align: middle;*/
-    /*text-align: left;*/
-/*}*/
-/*.header {*/
-    /*border: 1px;*/
-    /*border-bottom-style: solid;*/
-    /*display: table-cell;*/
-    /*height: 40px;*/
-    /*vertical-align: middle;*/
-    /*width: 4.3in;*/
-/*}*/
 
-/*.card-title {*/
-    /*font: bold 28px Genova, sans-serif;*/
-    /*padding-top: 0.5em;*/
-    /*text-align: center;*/
-/*}*/
+table.prb{
+    border-collapse: collapse;
+    width: 100%;
+    margin: 0.1in 0.1in 0.1in 0.1in;
+}
 
-/*.description {*/
-    /*float: left;*/
-    /*font: 12pt Georgia, sans-serif;*/
-    /*margin: 0.25em auto 0 auto;*/
-    /*padding-left: 1.0em;*/
-    /*padding-right: 1.0em;*/
-    /*overflow-y: hidden;*/
-    /*width: 100%;*/
-    /*word-wrap: break-word;*/
-/*}*/
+th.prb {
+    background-color: #c0c0c0;
+    padding: 5px;
+    font-family: ProximaNovaSemiBold, Helvetica, Arial;
+}
 
-/*.owner {*/
-    /*float: right;*/
-    /*height: 40px;*/
-/*}*/
+td.prb {
+    padding: 10px;
+    font-family: ProximaNova, Helvetica, Arial;
+}
 
-/*.ownerText {*/
-    /*float: right;*/
-    /*font: 14pt / 1.26 Arial, Helvetica, sans-serif;*/
-    /*margin-right: 0.3em;*/
-    /*margin-top: 0.3em;*/
-/*}*/
+.prb {
+    border: 1px solid black;
+}
 
-/*.card-id {*/
-    /*float: left;*/
-    /*font: 14pt / 1.26 Arial, Helvetica, sans-serif;*/
-    /*margin-left: 0.25em;*/
-    /*margin-top: 0.3em;*/
-/*}*/
+.artifact {
+    background-color: #fff;
+    border: 2px solid #000;
+    float: left;
+    height: 3.2in;
+    margin: 0.1in 0.1in 0.1in 0.1in;
+    position: relative;
+    overflow: hidden;
+    width: 4.3in;
+}
+.r1 {
+    border: 1px;
+    border-bottom-style: solid;
+    height: 40px;
+    font-family: NotoSans, Helvetica, Arial;
+    font-size: 12pt;
+    background-color: #6699cc;
+    color: #FFFFFF;
+}
+.r1left {
+    display: table-cell;
+    padding-top: 0.5em;
+    width: 2.8in;
+    height: 40px;
+    padding-left: 0.5em;
+    border-right: 1px solid #000;
+}
+.r1right {
+    display: table-cell;
+    padding-top: 0.5em;
+    width: 1.5in;
+    padding-left: 0.5em;
+}
+.r2{
+    border: 1px;
+    border-bottom-style: solid;
+    height: 40px;
+    font-family: NotoSans, Helvetica, Arial;
+    font-size: 10pt;
+    background-color: #d9e6f2;
+}
+.r2left {
+    display: table-cell;
+    width: 1.3in;
+    padding-top: 0.5em;
+    padding-left: 0.5em;
+    height: 40px;
+    border-right: 1px solid #000;
+}
+.r2middle {
+    display: table-cell;
+    width: 1.4in;
+    padding-top: 0.5em;
+    height: 40px;
+    padding-left: 0.5em;
+    border-right: 1px solid #000;
+}
+.r2right {
+    display: table-cell;
+    padding-top: 0.5em;
+    padding-left: 0.5em;
+    width: 1.5in;
+}
+.r3{
+    border: 1px;
+    border-bottom-style: solid;
+    height: 120px;
+    font-family: NotoSans, Helvetica, Arial;
+    font-size: 12pt;
+}
+.r3middle {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+}
+.r4{
+    border: 1px;
+    border-bottom-style: solid;
+    height: 120px;
+    font-family: NotoSans, Helvetica, Arial;
+    font-size: 12pt;
+}
+.r4middle {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+}
+.header {
+    border: 1px;
+    border-bottom-style: solid;
+    display: table-cell;
+    height: 40px;
+    vertical-align: middle;
+    width: 4.3in;
+}
 
-/*.estimate {*/
-    /*bottom: 0.5em;*/
-    /*position: absolute;*/
-    /*right: 0.5em;*/
-/*}*/
+.card-title {
+    font: bold 28px Genova, sans-serif;
+    padding-top: 0.5em;
+    text-align: center;
+}
 
-/*.content {*/
-    /*height: 2.4in;*/
-    /*overflow: hidden;*/
-    /*width: 3.7in;*/
-/*}*/
-/*</style>*/
+.description {
+    float: left;
+    font: 12pt Georgia, sans-serif;
+    margin: 0.25em auto 0 auto;
+    padding-left: 1.0em;
+    padding-right: 1.0em;
+    overflow-y: hidden;
+    width: 100%;
+    word-wrap: break-word;
+}
+
+.owner {
+    float: right;
+    height: 40px;
+}
+
+.ownerText {
+    float: right;
+    font: 14pt / 1.26 Arial, Helvetica, sans-serif;
+    margin-right: 0.3em;
+    margin-top: 0.3em;
+}
+
+.card-id {
+    float: left;
+    font: 14pt / 1.26 Arial, Helvetica, sans-serif;
+    margin-left: 0.25em;
+    margin-top: 0.3em;
+}
+
+.estimate {
+    bottom: 0.5em;
+    position: absolute;
+    right: 0.5em;
+}
+
+.content {
+    height: 2.4in;
+    overflow: hidden;
+    width: 4.3in;
+}
+</style>
     </style>
 
 </head>

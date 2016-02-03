@@ -2,7 +2,7 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
     extend: 'Ext.XTemplate',
 
     tbdText: 'TBD',
-    prbView: true,
+    prbView: 'prb',
 
     getHealthColor: function(field, values){
         var re = /color=\"(.*)\"/i,
@@ -36,10 +36,13 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
         return Ext.String.ellipsis(text, this.maxChars, true);
     },
     getTitleRowSpan: function(){
-        if (this.prbView){
+        if (this.showPRBView()){
             return 3;
         }
         return 2;
+    },
+    showPRBView: function(){
+        return this.prbView === 'prb';
     },
     constructor: function(config) {
        var templateConfig = [
@@ -47,7 +50,7 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
            '<table class="prb">',
                 '<tr>',
                     '<th class="prb" width="25%">BU/CRG - Project Title</th>',
-                    '<th class="prb" width="20%">Sponsors (S), (EC)</br>Project Manager (PM), BU Lead (BL)</th>',
+                    '<th class="prb" width="25%">Sponsors (S), (EC)</br>Project Manager (PM), BU Lead (BL)</th>',
                     '<th class="prb" width="15%">Start Date (S)</br>Release (R)</br>End Date (E)</th>',
                     '<th class="prb" width="20%">Next Key Milestone</th>',
                     '<th class="prb" colspan="6"><b>Project Health & Budget Spend:</b></br>(w/IT Cmte ask if needed)</th>',
@@ -73,7 +76,7 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
                         '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthField, values)]};">H</td>',
                         '<td class="prb" colspan="5"><tpl if="values[this.budgetSpentField]">{[this.getStringValue(values[this.budgetSpentField])]}</tpl> of <tpl if="values[this.totalBudgetField]">{[this.getStringValue(values[this.totalBudgetField])]}</tpl></td>',
                    '</tr>',
-                   '<tpl if="this.prbView"><tr>',
+                   '<tpl if="this.showPRBView()"><tr>',
                        '<td class="prb">',
                            '<tpl if="values[this.vsmField]">{[this.getStringValue(values[this.vsmField])]} (VSM),</tpl>',
                            '<tpl if="values[this.sltField]">{[this.getStringValue(values[this.sltField])]} (SLT)</tpl>',
