@@ -3,6 +3,8 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
 
     tbdText: 'TBD',
     prbView: 'prb',
+    footerLeft: "Robert W. Baird",
+    footerCenter: 'Project Health Key: <span style="text-decoration:underline;"><b>T</b></span>imeline, <span style="text-decoration:underline;"><b>S</b></span>cope, <span style="text-decoration:underline;"><b>Q</b></span>uality, <span style="text-decoration:underline;"><b>R</b></span>esources, <span style="text-decoration:underline;"><b>B</b></span>udget Spend, <span style="text-decoration:underline;"><b>C</b></span>hange',
 
     getHealthColor: function(field, values){
         var re = /color=\"(.*)\"/i,
@@ -48,19 +50,22 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
     showPRBView: function(){
         return this.prbView === 'prb';
     },
+    getCurrentDate: function(){
+        return Rally.util.DateTime.formatWithDefault(new Date());
+    },
     constructor: function(config) {
        var templateConfig = [
            '<tpl>',
-           '<table class="prb">',
-                '<tr>',
+        '<table class="prbtable" id="prb-table">',
+                '<thead><tr style="border:0;"><th colspan="10" class="prbheader">Executive Dashboard - Portfolio Highlights<br/>Status as of: {[this.getCurrentDate()]}</th></tr><tr>',
                     '<th class="prb" width="25%">BU/CRG - Project Title</th>',
                     '<th class="prb" width="25%">Sponsors (S), (EC)</br>Project Manager (PM), BU Lead (BL)</th>',
                     '<th class="prb" width="15%">Start Date (S)</br>Release (R)</br>End Date (E)</th>',
                     '<th class="prb" width="20%">Next Key Milestone</th>',
-                    '<th class="prb" colspan="6"><b>Project Health & Budget Spend:</b></br>(w/IT Cmte ask if needed)</th>',
-                '</tr>',
+                    '<th class="prb" colspan="6"><b>Project Health and Budget Spend:</b></br>(w/IT Cmte ask if needed)</th>',
+                '</tr></thead>',
                 '<tpl foreach=".">',
-                    '<tr>',
+                    '<tbody><tr>',
                         '<td class="prb" rowspan="{[this.getTitleRowSpan()]}">{[this.getProjectTitle(values)]}</td>',
                         '<td class="prb" rowspan="2">',
                             '<tpl if="values[this.sponsorField]">{[this.getStringValue(values[this.sponsorField])]} (S)</br></tpl>',
@@ -96,13 +101,19 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
                        '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthResourcesField, values)]};">R</td>',
                        '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthBudgetSpendField, values)]};">B</td>',
                        '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthChangeField, values)]};">C</td>',
-                    '</tr><tpl else>',  //ITC View
+                    '</tr></tbody><tpl else>',  //ITC View
                        '<tr>',
                             '<td class="prb" style="width:2%;padding-left:0px;padding-right:0px;text-align:center;background-color:{[this.getHealthColor(this.projectHealthField, values)]};">H</td>',
                             '<td class="prb" colspan="5"><tpl if="values[this.budgetSpentField]">{[this.getStringValue(values[this.budgetSpentField])]}<tpl if="values[this.totalBudgetField]"> of {[this.getStringValue(values[this.totalBudgetField])]}</tpl></tpl></td>',
-                       '</tr>',
+                       '</tr></tbody>',
                     '</tpl>',
-           '</tpl>'
+                '</tpl>',
+               '<tfoot><tr style="border:0;">',
+               '<td class="fleft">{[this.footerLeft]}</td>',
+               '<td colspan="3" class="fcenter">{[this.footerCenter]}</td>',
+               '<td colspan="6" class="fright">pageNumber</td>',
+               '</tr></tfoot>',
+           '</table></tpl>'
        ];
 
         templateConfig.push(config);

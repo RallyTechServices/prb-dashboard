@@ -3,11 +3,11 @@
 <head>
     <title>PRB Dashboard</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Wed Feb 03 2016 11:40:02 GMT-0700 (MST) -->
+    <!--  Build Date: Sat Feb 13 2016 12:04:20 GMT-0700 (MST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Wed Feb 03 2016 11:40:02 GMT-0700 (MST)";
-        var CHECKSUM = 18461893069;
+        var APP_BUILD_DATE = "Sat Feb 13 2016 12:04:20 GMT-0700 (MST)";
+        var CHECKSUM = 20054265263;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -176,59 +176,75 @@ Ext.define('Rally.technicalservices.Logger',{
 
 });
 
-Ext.define('Rally.technicalservices.window.PRBPrint',{
+Ext.define('Rally.technicalservices.window.Print',{
     extend: 'Ext.Window',
     logger: new Rally.technicalservices.Logger(),
-    truncateText: '...',
-    config: {
-        title: 'Print PRB Report',
-        records: null,
-        styleSheetTitle: "printPRB",
-        currentDocument: null,
-        /**
-         *  Array of the following:
-         *  dataIndex
-         *  maxLength (default 0)
-         *  cls (defaults are: card-title, content,
-         */
-        displayFields: null,
-    },
-    constructor: function(config){
-        this.initConfig(config);
-    },
-    show: function(html){
-        var options = "toolbar=1,menubar=1,scrollbars=yes,scrolling=yes,resizable=yes,width=1000,height=500";
-        var win = window.open('',this.title);
 
+    show: function(element, printAreaRatio){
 
-        win.document.write('<html><head><title>' + this.title + '</title>');
-        win.document.write('<style>');
-        win.document.write(this._getStyleSheet(this.styleSheetTitle));
-        win.document.write('</style>');
-        win.document.write('</head><body class="landscape">');
-        win.document.write(html);
-        win.document.write('</body></html>');
-    },
+        var win = window.open('', this.title, 'width=200,location=no,left=200px,toolbar=0,scrollbars=0,status =0');
 
-    _getStyleSheet: function(styleSheetTitle) {
-        this.logger.log('getStyleSheet');
-        var styleSheet;
+        var maxPixelsPerPage = element.offsetWidth * printAreaRatio;
 
-        var elems = this.currentDocument.query('style');
+        var headerRow = element.getElementsByTagName('thead')[0];
+        var rows = element.getElementsByTagName('tbody');
+        var footerRow = element.getElementsByTagName('tfoot')[0];
 
-        for (var i=0; i< elems.length; i++){
-            if (elems[i].title == styleSheetTitle){
-                styleSheet = elems[i];
+        var current_date = Rally.util.DateTime.formatWithDefault(new Date());
+
+        var pageHeight = 0,
+            html = '<!DOCTYPE html><html><head><title>Executive Summary - Portfolio Highlights - Status as of: ' + current_date + ' </title>';
+        html += '<style>' + this._getStyleSheet() + '</style></head>';
+
+        html += '"<body onload=\"window.print(); window.close();\"><table class=\"prbtable\">';
+        html += headerRow.outerHTML;
+        pageHeight += headerRow.offsetHeight;
+
+        var pageNumber = 1;
+
+        for (var i=1; i<rows.length; i++){
+            if ((pageHeight + rows[i].offsetHeight) > maxPixelsPerPage){
+                html += footerRow.outerHTML.replace("pageNumber", "Page " + pageNumber++) + '</table><table class="prbtable">';
+                pageHeight = headerRow.offsetHeight;
+                html +=  headerRow.outerHTML;
             }
+            html += rows[i].outerHTML;
+            pageHeight += rows[i].offsetHeight;
         }
-        return styleSheet.innerHTML;
+        html += footerRow.outerHTML.replace("pageNumber", "Page " + pageNumber++) + '</table></body></html>';
+
+        win.document.write(html);
+        win.document.close();
     },
+    _getStyleSheet: function(){
+        var style = "<style>" +
+            "@page { size: letter landscape; margin: 0.1in 0.1in 0.1in 0.1in; }" +
+            "@media all { " +
+                    "body {margin: 5;}" +
+                    "header {height: 0.5in; font-family: ProximaNovaSemiBold, Helvetica, Arial; text-align:center;width:100%;font-size:9pt;}" +
+                    "footer {height: 0.25in; width:100%; page-break-after:always; vertical-align: bottom;}" +
+                    "th.prb { background-color: #c0c0c0; padding: 0.1in; font-family: ProximaNovaSemiBold, Helvetica, Arial; font-size:10pt;}" +
+                    "td.prb { padding-top:  0.1in; padding-bottom:  0.1in; padding-left:  0.1in; padding-right:  0.1in; font-size:9pt;font-family: ProximaNova, Helvetica, Arial; page-break-inside: avoid; page-break-after:auto; }" +
+                    ".prb { border: 1px solid black; }" +
+                    "thead {display: table-header-group;}" +
+                    "table.prbtable{ border-collapse: collapse; width: 100%;page-break-after:always;}" +
+                    ".prbheader { border:0; text-align:center; font-size:10pt; font-family: ProximaNova, Helvetica, Arial; padding:0.1in;}" +
+                    ".fleft {vertical-align: bottom; padding-top: 0.25in;font-family: ProximaNova, Helvetica, Arial; text-align:left;font-size:9pt; }" +
+                    ".fcenter {vertical-align: bottom;  font-family: ProximaNova, Helvetica, Arial; text-align:center;font-size:9pt;}" +
+                    ".fright {vertical-align: bottom;  font-family: ProximaNova, Helvetica, Arial; text-align:right;font-size:9pt;}" +
+                "}" +
+            "</style>";
+
+        return style;
+    }
 });
 Ext.define('Rally.technicalservices.prbDashboard.Template',{
     extend: 'Ext.XTemplate',
 
     tbdText: 'TBD',
     prbView: 'prb',
+    footerLeft: "Robert W. Baird",
+    footerCenter: 'Project Health Key: <span style="text-decoration:underline;"><b>T</b></span>imeline, <span style="text-decoration:underline;"><b>S</b></span>cope, <span style="text-decoration:underline;"><b>Q</b></span>uality, <span style="text-decoration:underline;"><b>R</b></span>esources, <span style="text-decoration:underline;"><b>B</b></span>udget Spend, <span style="text-decoration:underline;"><b>C</b></span>hange',
 
     getHealthColor: function(field, values){
         var re = /color=\"(.*)\"/i,
@@ -274,19 +290,22 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
     showPRBView: function(){
         return this.prbView === 'prb';
     },
+    getCurrentDate: function(){
+        return Rally.util.DateTime.formatWithDefault(new Date());
+    },
     constructor: function(config) {
        var templateConfig = [
            '<tpl>',
-           '<table class="prb">',
-                '<tr>',
+        '<table class="prbtable" id="prb-table">',
+                '<thead><tr style="border:0;"><th colspan="10" class="prbheader">Executive Dashboard - Portfolio Highlights<br/>Status as of: {[this.getCurrentDate()]}</th></tr><tr>',
                     '<th class="prb" width="25%">BU/CRG - Project Title</th>',
                     '<th class="prb" width="25%">Sponsors (S), (EC)</br>Project Manager (PM), BU Lead (BL)</th>',
                     '<th class="prb" width="15%">Start Date (S)</br>Release (R)</br>End Date (E)</th>',
                     '<th class="prb" width="20%">Next Key Milestone</th>',
-                    '<th class="prb" colspan="6"><b>Project Health & Budget Spend:</b></br>(w/IT Cmte ask if needed)</th>',
-                '</tr>',
+                    '<th class="prb" colspan="6"><b>Project Health and Budget Spend:</b></br>(w/IT Cmte ask if needed)</th>',
+                '</tr></thead>',
                 '<tpl foreach=".">',
-                    '<tr>',
+                    '<tbody><tr>',
                         '<td class="prb" rowspan="{[this.getTitleRowSpan()]}">{[this.getProjectTitle(values)]}</td>',
                         '<td class="prb" rowspan="2">',
                             '<tpl if="values[this.sponsorField]">{[this.getStringValue(values[this.sponsorField])]} (S)</br></tpl>',
@@ -322,13 +341,19 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
                        '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthResourcesField, values)]};">R</td>',
                        '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthBudgetSpendField, values)]};">B</td>',
                        '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthChangeField, values)]};">C</td>',
-                    '</tr><tpl else>',  //ITC View
+                    '</tr></tbody><tpl else>',  //ITC View
                        '<tr>',
                             '<td class="prb" style="width:2%;padding-left:0px;padding-right:0px;text-align:center;background-color:{[this.getHealthColor(this.projectHealthField, values)]};">H</td>',
                             '<td class="prb" colspan="5"><tpl if="values[this.budgetSpentField]">{[this.getStringValue(values[this.budgetSpentField])]}<tpl if="values[this.totalBudgetField]"> of {[this.getStringValue(values[this.totalBudgetField])]}</tpl></tpl></td>',
-                       '</tr>',
+                       '</tr></tbody>',
                     '</tpl>',
-           '</tpl>'
+                '</tpl>',
+               '<tfoot><tr style="border:0;">',
+               '<td class="fleft">{[this.footerLeft]}</td>',
+               '<td colspan="3" class="fcenter">{[this.footerCenter]}</td>',
+               '<td colspan="6" class="fright">pageNumber</td>',
+               '</tr></tfoot>',
+           '</table></tpl>'
        ];
 
         templateConfig.push(config);
@@ -401,7 +426,7 @@ Ext.define('Rally.technicalservices.prbDashboard.Settings',{
             questionField: 'Ask of ITC'
         },
 
-        getFields: function (model, modelDisplayName) {
+        getFields: function (model, modelDisplayName,printAreaValue) {
             var labelWidth = 250,
                 fields = [];
 
@@ -461,6 +486,29 @@ Ext.define('Rally.technicalservices.prbDashboard.Settings',{
                 });
             });
 
+            fields.push({
+                xtype: 'container',
+                layout: 'hbox',
+                margin: '25 0 0 0',
+                items: [{
+                    xtype: 'slider',
+                    name: 'printAreaRatio',
+                    fieldLabel: 'Print Area Ratio',
+                    labelAlign: 'right',
+                    width: labelWidth + 200,
+                    labelWidth: labelWidth,
+                    minValue: 1,
+                    hideLabel: false,
+                    useTips: false,
+                    increment: 1,
+                    maxValue: 100,
+                    value: printAreaValue
+                },{
+                    xtype: 'container',
+                    margin: '0 0 0 25',
+                    html: 'This slider adjusts the number of pixels that will be fit onto one page when printed.<br/>The higher this number, the more will be fit onto a page.  If this number is too high, then the pages will not break properly in the print view.'
+                }]
+            });
 
             return fields;
         }
@@ -480,6 +528,7 @@ Ext.define("prb-dashboard", {
                 model: 'PortfolioItem/ProgramorProject',
                 maxChars: 100,
                 noParentString: '(No Parent)',
+            printAreaRatio: 42,
 
                 sponsorField: 'Name',
                 ecField: 'Name',
@@ -507,7 +556,7 @@ Ext.define("prb-dashboard", {
     integrationHeaders : {
         name : "prb-dashboard"
     },
-                        
+
     launch: function() {
         this.fetchData();
     },
@@ -595,7 +644,7 @@ Ext.define("prb-dashboard", {
 
         this._addHeaderComponents(items);
 
-       this._updateReport();
+        this._updateReport();
 
     },
     _addHeaderComponents: function(items){
@@ -615,13 +664,13 @@ Ext.define("prb-dashboard", {
             tpl: '<tpl>{count} items found.</tpl>'
         });
 
-        ct.add({
-            xtype: 'container',
-            margin: '0 0 0 0',
-            itemId: 'ct-project-health-key',
-            flex: 1,
-            html: 'Project Health Key: <span style="text-decoration:underline;"><b>T</b></span>imeline, <span style="text-decoration:underline;"><b>S</b></span>cope, <span style="text-decoration:underline;"><b>Q</b></span>uality, <span style="text-decoration:underline;"><b>R</b></span>esources, <span style="text-decoration:underline;"><b>B</b></span>udget Spend, <span style="text-decoration:underline;"><b>C</b></span>hange'
-        });
+        //ct.add({
+        //    xtype: 'container',
+        //    margin: '0 0 0 0',
+        //    itemId: 'ct-project-health-key',
+        //    flex: 1,
+        //    html: 'Project Health Key: <span style="text-decoration:underline;"><b>T</b></span>imeline, <span style="text-decoration:underline;"><b>S</b></span>cope, <span style="text-decoration:underline;"><b>Q</b></span>uality, <span style="text-decoration:underline;"><b>R</b></span>esources, <span style="text-decoration:underline;"><b>B</b></span>udget Spend, <span style="text-decoration:underline;"><b>C</b></span>hange'
+        //});
 
 
     },
@@ -629,10 +678,10 @@ Ext.define("prb-dashboard", {
         return this.down('#cb-view') && this.down('#cb-view').getValue() || 'prb';
     },
     _printPrb: function(){
-        var win = Ext.create('Rally.technicalservices.window.PRBPrint',{
-            currentDocument: Ext.getDoc()
-        });
-        win.show(this.down('#tpl-report').getEl().dom.innerHTML);
+        var printAreaRatio = this.getSetting('printAreaRatio')/100;
+
+        var win = Ext.create('Rally.technicalservices.window.Print');
+        win.show(Ext.getElementById('prb-table'),printAreaRatio);
     },
     _updateReport: function(){
 
@@ -671,7 +720,7 @@ Ext.define("prb-dashboard", {
         }).update(filteredItems);
         this.down('#ct-num-items').update({count: filteredItems.length});
     },
-       getOptions: function() {
+    getOptions: function() {
         return [
             {
                 text: 'About...',
@@ -686,17 +735,17 @@ Ext.define("prb-dashboard", {
     },
     getSettingsFields: function(){
         var modelDisplayName = "Program or Project";
-        return Rally.technicalservices.prbDashboard.Settings.getFields(this.getSetting('model'),modelDisplayName);
+        return Rally.technicalservices.prbDashboard.Settings.getFields(this.getSetting('model'),modelDisplayName, Number(this.getSetting('printAreaRatio')));
     },
     _launchInfo: function() {
         if ( this.about_dialog ) { this.about_dialog.destroy(); }
         this.about_dialog = Ext.create('Rally.technicalservices.InfoLink',{});
     },
-    
+
     isExternal: function(){
         return typeof(this.getAppId()) == 'undefined';
     },
-    
+
     //onSettingsUpdate:  Override
     onSettingsUpdate: function (settings){
         this.logger.log('onSettingsUpdate',settings);
@@ -731,233 +780,36 @@ Ext.define("prb-dashboard", {
     cursor: pointer;
 }
 
-table.prb{
-    border-collapse: collapse;
-    width: 100%;
-    margin: 25px;
-}
+table.prbtable{ border-collapse: collapse; width: 100%; margin: 25px; }
 
-th.prb {
-    background-color: #c0c0c0;
-    padding: 5px;
-    font-family: ProximaNovaSemiBold, Helvetica, Arial;
-}
+th.prb { background-color: #c0c0c0; padding: 5px; font-family: ProximaNovaSemiBold, Helvetica, Arial; }
 
-td.prb {
-    padding-top: 3px;
-    padding-bottom: 3px;
-    padding-left: 10px;
-    padding-right: 10px;
+td.prb { padding-top: 3px; padding-bottom: 3px; padding-left: 10px; padding-right: 10px; font-family: ProximaNova, Helvetica, Arial; }
+
+tr.bodyhead { display: none; }
+
+.prb { border: 1px solid black; }
+
+.prbheader {
+    border:0;
+    text-align:center;
+    font-size:10pt;
     font-family: ProximaNova, Helvetica, Arial;
+    padding: 3px;
 }
 
-.prb {
-    border: 1px solid black;
-}
-
-span.prb {
-    padding: 10px;
-
-}
-
-<style type="text/css" title="printPRB">
-/* PLEASE LEAVE THIS STYLESHEET INLINE SINCE TITLE IS NECESSARY */
-@media print {
-    #interface {
-        display: none;
-    }
-
-    .pb {
-        page-break-after: always;
-        clear: both;
-    }
-}
-
-#interface, #printSection {
-    margin: 20px;
-}
-
-html {
-    background-color: #fff;
-    color: #000;
-    font: 11pt / 1.26 Arial, Helvetica, sans-serif;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    background-color: #fff;
-    margin: 25;
-    padding: 0;
-
-}
-
-
-table.prb{
-    border-collapse: collapse;
-    width: 100%;
-    margin: 0.1in 0.1in 0.1in 0.1in;
-}
-
-th.prb {
-    background-color: #c0c0c0;
-    padding: 5px;
-    font-family: ProximaNovaSemiBold, Helvetica, Arial;
-}
-
-td.prb {
-    padding: 10px;
+.prbfooter {
+    border:0;
+    text-align:center;
+    font-size:9pt;
     font-family: ProximaNova, Helvetica, Arial;
+    padding: 3px;
 }
+tfoot {font-family: ProximaNova, Helvetica, Arial; font-size:9pt; }
 
-.prb {
-    border: 1px solid black;
-}
-
-.artifact {
-    background-color: #fff;
-    border: 2px solid #000;
-    float: left;
-    height: 3.2in;
-    margin: 0.1in 0.1in 0.1in 0.1in;
-    position: relative;
-    overflow: hidden;
-    width: 4.3in;
-}
-.r1 {
-    border: 1px;
-    border-bottom-style: solid;
-    height: 40px;
-    font-family: NotoSans, Helvetica, Arial;
-    font-size: 12pt;
-    background-color: #6699cc;
-    color: #FFFFFF;
-}
-.r1left {
-    display: table-cell;
-    padding-top: 0.5em;
-    width: 2.8in;
-    height: 40px;
-    padding-left: 0.5em;
-    border-right: 1px solid #000;
-}
-.r1right {
-    display: table-cell;
-    padding-top: 0.5em;
-    width: 1.5in;
-    padding-left: 0.5em;
-}
-.r2{
-    border: 1px;
-    border-bottom-style: solid;
-    height: 40px;
-    font-family: NotoSans, Helvetica, Arial;
-    font-size: 10pt;
-    background-color: #d9e6f2;
-}
-.r2left {
-    display: table-cell;
-    width: 1.3in;
-    padding-top: 0.5em;
-    padding-left: 0.5em;
-    height: 40px;
-    border-right: 1px solid #000;
-}
-.r2middle {
-    display: table-cell;
-    width: 1.4in;
-    padding-top: 0.5em;
-    height: 40px;
-    padding-left: 0.5em;
-    border-right: 1px solid #000;
-}
-.r2right {
-    display: table-cell;
-    padding-top: 0.5em;
-    padding-left: 0.5em;
-    width: 1.5in;
-}
-.r3{
-    border: 1px;
-    border-bottom-style: solid;
-    height: 120px;
-    font-family: NotoSans, Helvetica, Arial;
-    font-size: 12pt;
-}
-.r3middle {
-    display: table-cell;
-    vertical-align: middle;
-    text-align: center;
-}
-.r4{
-    border: 1px;
-    border-bottom-style: solid;
-    height: 120px;
-    font-family: NotoSans, Helvetica, Arial;
-    font-size: 12pt;
-}
-.r4middle {
-    display: table-cell;
-    vertical-align: middle;
-    text-align: center;
-}
-.header {
-    border: 1px;
-    border-bottom-style: solid;
-    display: table-cell;
-    height: 40px;
-    vertical-align: middle;
-    width: 4.3in;
-}
-
-.card-title {
-    font: bold 28px Genova, sans-serif;
-    padding-top: 0.5em;
-    text-align: center;
-}
-
-.description {
-    float: left;
-    font: 12pt Georgia, sans-serif;
-    margin: 0.25em auto 0 auto;
-    padding-left: 1.0em;
-    padding-right: 1.0em;
-    overflow-y: hidden;
-    width: 100%;
-    word-wrap: break-word;
-}
-
-.owner {
-    float: right;
-    height: 40px;
-}
-
-.ownerText {
-    float: right;
-    font: 14pt / 1.26 Arial, Helvetica, sans-serif;
-    margin-right: 0.3em;
-    margin-top: 0.3em;
-}
-
-.card-id {
-    float: left;
-    font: 14pt / 1.26 Arial, Helvetica, sans-serif;
-    margin-left: 0.25em;
-    margin-top: 0.3em;
-}
-
-.estimate {
-    bottom: 0.5em;
-    position: absolute;
-    right: 0.5em;
-}
-
-.content {
-    height: 2.4in;
-    overflow: hidden;
-    width: 4.3in;
-}
-</style>
+.fleft { text-align:left;padding:10px;}
+.fcenter { text-align:center;}
+.fright { text-align:right; display:none;}
     </style>
 
 </head>

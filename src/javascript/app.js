@@ -11,6 +11,7 @@ Ext.define("prb-dashboard", {
                 model: 'PortfolioItem/ProgramorProject',
                 maxChars: 100,
                 noParentString: '(No Parent)',
+            printAreaRatio: 42,
 
                 sponsorField: 'Name',
                 ecField: 'Name',
@@ -38,7 +39,7 @@ Ext.define("prb-dashboard", {
     integrationHeaders : {
         name : "prb-dashboard"
     },
-                        
+
     launch: function() {
         this.fetchData();
     },
@@ -126,7 +127,7 @@ Ext.define("prb-dashboard", {
 
         this._addHeaderComponents(items);
 
-       this._updateReport();
+        this._updateReport();
 
     },
     _addHeaderComponents: function(items){
@@ -146,13 +147,13 @@ Ext.define("prb-dashboard", {
             tpl: '<tpl>{count} items found.</tpl>'
         });
 
-        ct.add({
-            xtype: 'container',
-            margin: '0 0 0 0',
-            itemId: 'ct-project-health-key',
-            flex: 1,
-            html: 'Project Health Key: <span style="text-decoration:underline;"><b>T</b></span>imeline, <span style="text-decoration:underline;"><b>S</b></span>cope, <span style="text-decoration:underline;"><b>Q</b></span>uality, <span style="text-decoration:underline;"><b>R</b></span>esources, <span style="text-decoration:underline;"><b>B</b></span>udget Spend, <span style="text-decoration:underline;"><b>C</b></span>hange'
-        });
+        //ct.add({
+        //    xtype: 'container',
+        //    margin: '0 0 0 0',
+        //    itemId: 'ct-project-health-key',
+        //    flex: 1,
+        //    html: 'Project Health Key: <span style="text-decoration:underline;"><b>T</b></span>imeline, <span style="text-decoration:underline;"><b>S</b></span>cope, <span style="text-decoration:underline;"><b>Q</b></span>uality, <span style="text-decoration:underline;"><b>R</b></span>esources, <span style="text-decoration:underline;"><b>B</b></span>udget Spend, <span style="text-decoration:underline;"><b>C</b></span>hange'
+        //});
 
 
     },
@@ -160,10 +161,10 @@ Ext.define("prb-dashboard", {
         return this.down('#cb-view') && this.down('#cb-view').getValue() || 'prb';
     },
     _printPrb: function(){
-        var win = Ext.create('Rally.technicalservices.window.PRBPrint',{
-            currentDocument: Ext.getDoc()
-        });
-        win.show(this.down('#tpl-report').getEl().dom.innerHTML);
+        var printAreaRatio = this.getSetting('printAreaRatio')/100;
+
+        var win = Ext.create('Rally.technicalservices.window.Print');
+        win.show(Ext.getElementById('prb-table'),printAreaRatio);
     },
     _updateReport: function(){
 
@@ -202,7 +203,7 @@ Ext.define("prb-dashboard", {
         }).update(filteredItems);
         this.down('#ct-num-items').update({count: filteredItems.length});
     },
-       getOptions: function() {
+    getOptions: function() {
         return [
             {
                 text: 'About...',
@@ -217,17 +218,17 @@ Ext.define("prb-dashboard", {
     },
     getSettingsFields: function(){
         var modelDisplayName = "Program or Project";
-        return Rally.technicalservices.prbDashboard.Settings.getFields(this.getSetting('model'),modelDisplayName);
+        return Rally.technicalservices.prbDashboard.Settings.getFields(this.getSetting('model'),modelDisplayName, Number(this.getSetting('printAreaRatio')));
     },
     _launchInfo: function() {
         if ( this.about_dialog ) { this.about_dialog.destroy(); }
         this.about_dialog = Ext.create('Rally.technicalservices.InfoLink',{});
     },
-    
+
     isExternal: function(){
         return typeof(this.getAppId()) == 'undefined';
     },
-    
+
     //onSettingsUpdate:  Override
     onSettingsUpdate: function (settings){
         this.logger.log('onSettingsUpdate',settings);
