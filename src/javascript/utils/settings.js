@@ -65,6 +65,20 @@ Ext.define('Rally.technicalservices.prbDashboard.Settings',{
             });
 
             fields.push({
+                xtype: 'rallyslider',
+                name: 'printAreaRatio',
+                fieldLabel: 'Print Area Ratio',
+                labelAlign: 'right',
+                width: labelWidth + 200,
+                labelWidth: labelWidth,
+                minValue: 1,
+                hideLabel: false,
+                useTips: false,
+                increment: 1,
+                maxValue: 100
+            });
+
+            fields.push({
                 xtype: 'rallynumberfield',
                 name: 'maxChars',
                 minValue: 0,

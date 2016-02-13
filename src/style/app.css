@@ -16,31 +16,33 @@
     cursor: pointer;
 }
 
-table.prb{
-    border-collapse: collapse;
-    width: 100%;
-    margin: 25px;
-}
+table.prbtable{ border-collapse: collapse; width: 100%; margin: 25px; }
 
-th.prb {
-    background-color: #c0c0c0;
-    padding: 5px;
-    font-family: ProximaNovaSemiBold, Helvetica, Arial;
-}
+th.prb { background-color: #c0c0c0; padding: 5px; font-family: ProximaNovaSemiBold, Helvetica, Arial; }
 
-td.prb {
-    padding-top: 3px;
-    padding-bottom: 3px;
-    padding-left: 10px;
-    padding-right: 10px;
+td.prb { padding-top: 3px; padding-bottom: 3px; padding-left: 10px; padding-right: 10px; font-family: ProximaNova, Helvetica, Arial; }
+
+tr.bodyhead { display: none; }
+
+.prb { border: 1px solid black; }
+
+.prbheader {
+    border:0;
+    text-align:center;
+    font-size:10pt;
     font-family: ProximaNova, Helvetica, Arial;
+    padding: 3px;
 }
 
-.prb {
-    border: 1px solid black;
+.prbfooter {
+    border:0;
+    text-align:center;
+    font-size:9pt;
+    font-family: ProximaNova, Helvetica, Arial;
+    padding: 3px;
 }
+tfoot {font-family: ProximaNova, Helvetica, Arial; font-size:9pt; }
 
-span.prb {
-    padding: 10px;
-
-}
+.fleft { text-align:left;padding:10px;}
+.fcenter { text-align:center;}
+.fright { text-align:right; display:none;}
