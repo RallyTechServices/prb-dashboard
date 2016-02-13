@@ -31,7 +31,7 @@ Ext.define('Rally.technicalservices.prbDashboard.Settings',{
             questionField: 'Ask of ITC'
         },
 
-        getFields: function (model, modelDisplayName) {
+        getFields: function (model, modelDisplayName,printAreaValue) {
             var labelWidth = 250,
                 fields = [];
 
@@ -65,20 +65,6 @@ Ext.define('Rally.technicalservices.prbDashboard.Settings',{
             });
 
             fields.push({
-                xtype: 'rallyslider',
-                name: 'printAreaRatio',
-                fieldLabel: 'Print Area Ratio',
-                labelAlign: 'right',
-                width: labelWidth + 200,
-                labelWidth: labelWidth,
-                minValue: 1,
-                hideLabel: false,
-                useTips: false,
-                increment: 1,
-                maxValue: 100
-            });
-
-            fields.push({
                 xtype: 'rallynumberfield',
                 name: 'maxChars',
                 minValue: 0,
@@ -105,6 +91,29 @@ Ext.define('Rally.technicalservices.prbDashboard.Settings',{
                 });
             });
 
+            fields.push({
+                xtype: 'container',
+                layout: 'hbox',
+                margin: '25 0 0 0',
+                items: [{
+                    xtype: 'slider',
+                    name: 'printAreaRatio',
+                    fieldLabel: 'Print Area Ratio',
+                    labelAlign: 'right',
+                    width: labelWidth + 200,
+                    labelWidth: labelWidth,
+                    minValue: 1,
+                    hideLabel: false,
+                    useTips: false,
+                    increment: 1,
+                    maxValue: 100,
+                    value: printAreaValue
+                },{
+                    xtype: 'container',
+                    margin: '0 0 0 25',
+                    html: 'This slider adjusts the number of pixels that will be fit onto one page when printed.<br/>The higher this number, the more will be fit onto a page.  If this number is too high, then the pages will not break properly in the print view.'
+                }]
+            });
 
             return fields;
         }

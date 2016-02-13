@@ -218,7 +218,7 @@ Ext.define("prb-dashboard", {
     },
     getSettingsFields: function(){
         var modelDisplayName = "Program or Project";
-        return Rally.technicalservices.prbDashboard.Settings.getFields(this.getSetting('model'),modelDisplayName);
+        return Rally.technicalservices.prbDashboard.Settings.getFields(this.getSetting('model'),modelDisplayName, Number(this.getSetting('printAreaRatio')));
     },
     _launchInfo: function() {
         if ( this.about_dialog ) { this.about_dialog.destroy(); }
