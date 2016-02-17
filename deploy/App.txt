@@ -3,11 +3,11 @@
 <head>
     <title>PRB Dashboard</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Sat Feb 13 2016 12:04:20 GMT-0700 (MST) -->
+    <!--  Build Date: Wed Feb 17 2016 08:54:21 GMT-0700 (MST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Sat Feb 13 2016 12:04:20 GMT-0700 (MST)";
-        var CHECKSUM = 20054265263;
+        var APP_BUILD_DATE = "Wed Feb 17 2016 08:54:21 GMT-0700 (MST)";
+        var CHECKSUM = 20319810771;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -243,7 +243,7 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
 
     tbdText: 'TBD',
     prbView: 'prb',
-    footerLeft: "Robert W. Baird",
+    footerLeft: "Robert W. Baird Confidential",
     footerCenter: 'Project Health Key: <span style="text-decoration:underline;"><b>T</b></span>imeline, <span style="text-decoration:underline;"><b>S</b></span>cope, <span style="text-decoration:underline;"><b>Q</b></span>uality, <span style="text-decoration:underline;"><b>R</b></span>esources, <span style="text-decoration:underline;"><b>B</b></span>udget Spend, <span style="text-decoration:underline;"><b>C</b></span>hange',
 
     getHealthColor: function(field, values){
@@ -567,7 +567,11 @@ Ext.define("prb-dashboard", {
             storeConfig = {
                 model: model,
                 fetch: fetchFields,
-                limit: 'Infinity'
+                limit: 'Infinity',
+                sorters: [{
+                    property: 'DragAndDropRank',
+                    direction: 'ASC'
+                }]
             },
             query = this.getSetting('reportQuery') || null;
         this.logger.log('Query', query, 'Fetch', fetchFields);
@@ -636,9 +640,14 @@ Ext.define("prb-dashboard", {
         this.removeAll();
 
 
-        var items = _.sortBy(_.map(portfolioItems, function(pi) {
+        //var items = _.sortBy(_.map(portfolioItems, function(pi) {
+        //    return pi.getData();
+        //}), function(pi){ return pi.Parent && pi.Parent.Name || "ZZZ";});
+
+        var items = _.map(portfolioItems, function(pi) {
             return pi.getData();
-        }), function(pi){ return pi.Parent && pi.Parent.Name || "ZZZ";});
+        });
+
 
         this.portfolioItems = items;
 

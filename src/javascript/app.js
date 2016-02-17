@@ -50,7 +50,11 @@ Ext.define("prb-dashboard", {
             storeConfig = {
                 model: model,
                 fetch: fetchFields,
-                limit: 'Infinity'
+                limit: 'Infinity',
+                sorters: [{
+                    property: 'DragAndDropRank',
+                    direction: 'ASC'
+                }]
             },
             query = this.getSetting('reportQuery') || null;
         this.logger.log('Query', query, 'Fetch', fetchFields);
@@ -119,9 +123,14 @@ Ext.define("prb-dashboard", {
         this.removeAll();
 
 
-        var items = _.sortBy(_.map(portfolioItems, function(pi) {
+        //var items = _.sortBy(_.map(portfolioItems, function(pi) {
+        //    return pi.getData();
+        //}), function(pi){ return pi.Parent && pi.Parent.Name || "ZZZ";});
+
+        var items = _.map(portfolioItems, function(pi) {
             return pi.getData();
-        }), function(pi){ return pi.Parent && pi.Parent.Name || "ZZZ";});
+        });
+
 
         this.portfolioItems = items;
 
