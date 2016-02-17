@@ -3,7 +3,7 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
 
     tbdText: 'TBD',
     prbView: 'prb',
-    footerLeft: "Robert W. Baird",
+    footerLeft: "Robert W. Baird Confidential",
     footerCenter: 'Project Health Key: <span style="text-decoration:underline;"><b>T</b></span>imeline, <span style="text-decoration:underline;"><b>S</b></span>cope, <span style="text-decoration:underline;"><b>Q</b></span>uality, <span style="text-decoration:underline;"><b>R</b></span>esources, <span style="text-decoration:underline;"><b>B</b></span>udget Spend, <span style="text-decoration:underline;"><b>C</b></span>hange',
 
     getHealthColor: function(field, values){
