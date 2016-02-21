@@ -83,7 +83,7 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
                     '</tr>',
                    '<tpl if="this.showPRBView()">',
                        '<tr>',
-                           '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthField, values)]};">H</td>',
+                           '<td class="prb fixed" style="background-color:{[this.getHealthColor(this.projectHealthField, values)]};">H</td>',
                            '<td class="prb" colspan="5"><tpl if="values[this.budgetSpentField]">{[this.getStringValue(values[this.budgetSpentField])]}<tpl if="values[this.totalBudgetField]"> of {[this.getStringValue(values[this.totalBudgetField])]}</tpl></tpl></td>',
                        '</tr><tr>',
                        '<td class="prb">',

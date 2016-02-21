@@ -3,11 +3,11 @@
 <head>
     <title>PRB Dashboard</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Wed Feb 17 2016 08:54:21 GMT-0700 (MST) -->
+    <!--  Build Date: Sun Feb 21 2016 12:28:17 GMT-0700 (MST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Wed Feb 17 2016 08:54:21 GMT-0700 (MST)";
-        var CHECKSUM = 20319810771;
+        var APP_BUILD_DATE = "Sun Feb 21 2016 12:28:17 GMT-0700 (MST)";
+        var CHECKSUM = 20407193245;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -323,7 +323,7 @@ Ext.define('Rally.technicalservices.prbDashboard.Template',{
                     '</tr>',
                    '<tpl if="this.showPRBView()">',
                        '<tr>',
-                           '<td class="prb" style="background-color:{[this.getHealthColor(this.projectHealthField, values)]};">H</td>',
+                           '<td class="prb fixed" style="background-color:{[this.getHealthColor(this.projectHealthField, values)]};">H</td>',
                            '<td class="prb" colspan="5"><tpl if="values[this.budgetSpentField]">{[this.getStringValue(values[this.budgetSpentField])]}<tpl if="values[this.totalBudgetField]"> of {[this.getStringValue(values[this.totalBudgetField])]}</tpl></tpl></td>',
                        '</tr><tr>',
                        '<td class="prb">',
@@ -794,6 +794,8 @@ table.prbtable{ border-collapse: collapse; width: 100%; margin: 25px; }
 th.prb { background-color: #c0c0c0; padding: 5px; font-family: ProximaNovaSemiBold, Helvetica, Arial; }
 
 td.prb { padding-top: 3px; padding-bottom: 3px; padding-left: 10px; padding-right: 10px; font-family: ProximaNova, Helvetica, Arial; }
+
+td.fixed { height: 10px; overflow: hidden;}
 
 tr.bodyhead { display: none; }
 

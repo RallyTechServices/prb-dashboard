@@ -22,6 +22,8 @@ th.prb { background-color: #c0c0c0; padding: 5px; font-family: ProximaNovaSemiBo
 
 td.prb { padding-top: 3px; padding-bottom: 3px; padding-left: 10px; padding-right: 10px; font-family: ProximaNova, Helvetica, Arial; }
 
+td.fixed { height: 10px; overflow: hidden;}
+
 tr.bodyhead { display: none; }
 
 .prb { border: 1px solid black; }
