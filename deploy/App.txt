@@ -3,11 +3,11 @@
 <head>
     <title>PRB Dashboard</title>
     <!--  (c) 2015 Rally Software Development Corp.  All Rights Reserved. -->
-    <!--  Build Date: Sun Feb 21 2016 12:28:17 GMT-0700 (MST) -->
+    <!--  Build Date: Thu Mar 17 2016 19:15:50 GMT-0400 (EDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Sun Feb 21 2016 12:28:17 GMT-0700 (MST)";
-        var CHECKSUM = 20407193245;
+        var APP_BUILD_DATE = "Thu Mar 17 2016 19:15:50 GMT-0400 (EDT)";
+        var CHECKSUM = 20628868026;
     </script>
     
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
@@ -612,6 +612,8 @@ Ext.define("prb-dashboard", {
             valueField: 'value',
             allowNoEntry: true,
             noEntryText: '-- No BU/CRG --',
+            stateful: true,
+            stateId: 'prb-dashboard-business-unit-filter',
             multiSelect: true,
             width: 500
         });
@@ -630,6 +632,8 @@ Ext.define("prb-dashboard", {
             valueField: 'value',
             allowNoEntry: false,
             noEntryText: '-- No BU/CRG --',
+            stateful: true,
+            stateId: 'prb-dashboard-view-selector',
             width: 250
         });
         cbView.on('change', this._updateReport, this);
