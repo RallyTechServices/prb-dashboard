@@ -95,6 +95,8 @@ Ext.define("prb-dashboard", {
             valueField: 'value',
             allowNoEntry: true,
             noEntryText: '-- No BU/CRG --',
+            stateful: true,
+            stateId: 'prb-dashboard-business-unit-filter',
             multiSelect: true,
             width: 500
         });
@@ -113,6 +115,8 @@ Ext.define("prb-dashboard", {
             valueField: 'value',
             allowNoEntry: false,
             noEntryText: '-- No BU/CRG --',
+            stateful: true,
+            stateId: 'prb-dashboard-view-selector',
             width: 250
         });
         cbView.on('change', this._updateReport, this);
